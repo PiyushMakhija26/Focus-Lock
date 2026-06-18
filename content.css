@@ -1,0 +1,97 @@
+/* Focus Lock - Focus Ring Overlay Styles */
+
+#focus-lock-ring.focus-ring-pill {
+  position: fixed;
+  z-index: 2147483647; /* Ensure it floats above all web elements */
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #212c24;
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(87, 120, 97, 0.2);
+  border-radius: 30px;
+  padding: 8px 16px;
+  box-shadow: 0 8px 24px rgba(44, 58, 48, 0.1);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  user-select: none;
+  max-width: 300px;
+  height: 36px;
+  overflow: hidden;
+}
+
+/* Dark mode override matching preference */
+@media (prefers-color-scheme: dark) {
+  #focus-lock-ring.focus-ring-pill {
+    color: #ecf3ee;
+    background-color: rgba(27, 33, 29, 0.85);
+    border-color: rgba(114, 154, 126, 0.25);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Position Classes */
+#focus-lock-ring.top-right {
+  top: 16px;
+  right: 16px;
+}
+#focus-lock-ring.bottom-right {
+  bottom: 16px;
+  right: 16px;
+}
+#focus-lock-ring.top-left {
+  top: 16px;
+  left: 16px;
+}
+#focus-lock-ring.bottom-left {
+  bottom: 16px;
+  left: 16px;
+}
+
+/* Inner elements styling */
+.focus-ring-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.focus-ring-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.focus-ring-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Minimized Dot State */
+#focus-lock-ring.focus-ring-pill.minimized {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
+  border-color: rgba(87, 120, 97, 0.5);
+  background-color: rgba(87, 120, 97, 0.9);
+}
+
+#focus-lock-ring.focus-ring-pill.minimized .focus-ring-text {
+  display: none;
+}
+
+#focus-lock-ring.focus-ring-pill.minimized .focus-ring-icon {
+  font-size: 16px;
+  margin: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  #focus-lock-ring.focus-ring-pill.minimized {
+    background-color: rgba(114, 154, 126, 0.9);
+  }
+}

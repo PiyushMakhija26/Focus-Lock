@@ -1,0 +1,128 @@
+/* Focus Lock v4.5 - YouTube Focus Styles */
+
+/* 1. Hide Homepage Feed */
+html.hide-home-feed ytd-browse[page-subtype="home"] ytd-rich-grid-renderer,
+html.hide-home-feed ytd-browse[page-subtype="home"] #contents {
+  display: none !important;
+}
+
+/* Homepage Placeholder Centering */
+#focus-lock-yt-placeholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 80px 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.fl-yt-card {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(87, 120, 97, 0.15);
+  border-radius: 20px;
+  padding: 40px 30px;
+  text-align: center;
+  max-width: 440px;
+  width: 100%;
+  box-shadow: 0 10px 30px rgba(44, 58, 48, 0.05);
+  backdrop-filter: blur(8px);
+  font-family: 'Outfit', sans-serif;
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Dark Mode styles for Placeholder */
+html[dark] .fl-yt-card {
+  background: rgba(27, 33, 29, 0.9);
+  border-color: rgba(114, 154, 126, 0.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.fl-yt-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.fl-yt-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #212c24;
+  margin-bottom: 8px;
+}
+
+html[dark] .fl-yt-title {
+  color: #ecf3ee;
+}
+
+.fl-yt-desc {
+  font-size: 14px;
+  color: #5a6d60;
+  line-height: 1.5;
+}
+
+html[dark] .fl-yt-desc {
+  color: #97ab9e;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 2. Hide Shorts Shelf & Navigation */
+html.hide-shorts ytd-mini-guide-entry-renderer[aria-label="Shorts"],
+html.hide-shorts ytd-guide-entry-renderer[entry-css="shorts"],
+html.hide-shorts ytd-reel-shelf-renderer,
+html.hide-shorts ytd-rich-shelf-renderer[is-shorts],
+html.hide-shorts ytd-thumbnail-overlay-time-status-renderer[overlay-style="SHORTS"],
+html.hide-shorts a[href^="/shorts"],
+html.hide-shorts ytd-video-renderer[is-shorts] {
+  display: none !important;
+}
+
+/* 3. Hide Recommendations in Watch Page (Preserving Playlist panel) */
+html.hide-recommendations #related {
+  display: none !important;
+}
+
+/* Whitelisted recommendations */
+html.filter-individual-recs #related ytd-compact-video-renderer {
+  display: none !important;
+}
+
+html.filter-individual-recs #related ytd-compact-video-renderer.show-trusted-rec {
+  display: flex !important;
+}
+
+/* 4. Hide End Screens */
+html.hide-end-screens .ytp-ce-element,
+html.hide-end-screens .videowall-endscreen,
+html.hide-end-screens .ytp-show-share-panel {
+  display: none !important;
+}
+
+/* 5. Hide Comments */
+html.hide-comments ytd-comments,
+html.hide-comments #comments {
+  display: none !important;
+}
+
+/* 6. Hide Trending / Explore */
+html.hide-trending ytd-guide-entry-renderer a[href="/feed/trending"],
+html.hide-trending ytd-mini-guide-entry-renderer a[href="/feed/trending"] {
+  display: none !important;
+}
+
+/* 7. Hide Notifications */
+html.hide-notifications ytd-notification-topbar-button-renderer,
+html.hide-notifications #notification-count {
+  display: none !important;
+}
+
+/* 8. Hide Engagement Statistics (Subscriber/View counts) */
+html.hide-counts #owner-sub-count,
+html.hide-counts #count.ytd-video-primary-info-renderer,
+html.hide-counts ytd-video-view-count-renderer,
+html.hide-counts #metadata-line span:first-child {
+  display: none !important;
+}

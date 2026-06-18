@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Focus Lock</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body class="light">
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <span class="logo-icon">🌿</span>
+        <span class="logo-text">Focus Lock</span>
+      </div>
+      <span id="activeModeIndicator" class="active-badge hidden">🔒 ACTIVE</span>
+    </header>
+
+    <!-- Recovery Banner (only shown if a recovery session is available) -->
+    <div id="recoveryBanner" class="recovery-banner hidden">
+      <div class="banner-content">
+        <span class="banner-icon">💡</span>
+        <div class="banner-text">
+          <span class="banner-title">Unfinished session found</span>
+          <span id="recoveryIntentText" class="banner-desc">"Solving Arrays"</span>
+        </div>
+      </div>
+      <button id="btnResume" class="btn-resume-session">Resume</button>
+    </div>
+
+    <!-- Main Views Area -->
+    <main class="app-content">
+      <!-- 1. FOCUS VIEW -->
+      <section id="tabView-focus" class="tab-view">
+        <!-- Status Card -->
+        <div id="statusCard" class="status-card inactive">
+          <div class="status-indicator-ring">
+            <div class="status-dot"></div>
+          </div>
+          <div class="status-details">
+            <h2 id="statusTitle" class="status-title">Ready to Focus</h2>
+            <p id="statusSubtitle" class="status-subtitle">Set your intent and launch a session.</p>
+          </div>
+        </div>
+
+        <!-- Setup Screen -->
+        <div id="setupScreen" class="view-panel">
+          <!-- Intent Input -->
+          <div class="input-group">
+            <label class="group-label">What are you working on?</label>
+            <input type="text" id="focusIntentInput" placeholder="e.g. Solving Arrays, Writing Blog Post..." max="50">
+          </div>
+
+          <!-- Duration Selector -->
+          <div class="input-group">
+            <label class="group-label">For How Long?</label>
+            <div class="timer-presets">
+              <button class="preset-btn active" data-duration="0">Indefinite</button>
+              <button class="preset-btn" data-duration="25">25 Mins</button>
+              <button class="preset-btn" data-duration="50">50 Mins</button>
+              <button id="customTimerBtn" class="preset-btn" data-duration="custom">Custom...</button>
+            </div>
+            
+            <div id="customTimerPanel" class="custom-timer-panel hidden">
+              <div class="custom-input-wrapper">
+                <input type="number" id="customMinutes" min="1" max="1440" placeholder="45">
+                <span class="input-suffix">minutes</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Enforcement Level Selector -->
+          <div class="input-group">
+            <label class="group-label">Choose Enforcement Level</label>
+            <div class="enforcement-levels-list">
+              <!-- Level 0 -->
+              <label class="enforcement-level-card">
+                <input type="radio" name="enforcementLevel" value="0">
+                <div class="level-card-content">
+                  <div class="level-header">
+                    <span class="level-dot"></span>
+                    <span class="level-name">Level 0 — Focus Session</span>
+                  </div>
+                  <span class="level-desc">Track distractions without restrictions. No warnings or blocking.</span>
+                </div>
+              </label>
+              <!-- Level 1 -->
+              <label class="enforcement-level-card">
+                <input type="radio" name="enforcementLevel" value="1">
+                <div class="level-card-content">
+                  <div class="level-header">
+                    <span class="level-dot"></span>
+                    <span class="level-name">Level 1 — Advisory</span>
+                  </div>
+                  <span class="level-desc">Gentle warnings when leaving workspace. Never block.</span>
+                </div>
+              </label>
+              <!-- Level 2 -->
+              <label class="enforcement-level-card">
+                <input type="radio" name="enforcementLevel" value="2">
+                <div class="level-card-content">
+                  <div class="level-header">
+                    <span class="level-dot"></span>
+                    <span class="level-name">Level 2 — Soft Lock</span>
+                  </div>
+                  <span class="level-desc">Warning page appears. Consciously choose to bypass, pause or return.</span>
+                </div>
+              </label>
+              <!-- Level 3 -->
+              <label class="enforcement-level-card">
+                <input type="radio" name="enforcementLevel" value="3">
+                <div class="level-card-content">
+                  <div class="level-header">
+                    <span class="level-dot"></span>
+                    <span class="level-name">Level 3 — Focus Site</span>
+                  </div>
+                  <span class="level-desc">Stay within one website. Multiple tabs allowed.</span>
+                </div>
+              </label>
+              <!-- Level 4 -->
+              <label class="enforcement-level-card">
+                <input type="radio" name="enforcementLevel" value="4" checked>
+                <div class="level-card-content">
+                  <div class="level-header">
+                    <span class="level-dot"></span>
+                    <span class="level-name">Level 4 — Focus Workspace</span>
+                  </div>
+                  <span class="level-desc">Access unlimited tabs across all workspace domains.</span>
+                </div>
+              </label>
+              <!-- Level 5 -->
+              <label class="enforcement-level-card">
+                <input type="radio" name="enforcementLevel" value="5">
+                <div class="level-card-content">
+                  <div class="level-header">
+                    <span class="level-dot"></span>
+                    <span class="level-name">Level 5 — Strict Tab Lock</span>
+                  </div>
+                  <span class="level-desc">Single tab only. No other tabs, switching, or navigating away.</span>
+                </div>
+              </label>
+            </div>
+            
+            <label class="remember-choice-checkbox">
+              <input type="checkbox" id="chkRememberEnforcement">
+              <span>Remember my choice</span>
+            </label>
+          </div>
+
+          <!-- Target Selector (One-click launch options) -->
+          <div class="input-group">
+            <label class="group-label">Launch Mode</label>
+            <div class="launch-modes-list">
+              <!-- Site Lock Button -->
+              <button id="btnLaunchSite" class="launch-card-btn" data-mode="site">
+                <span class="card-icon">🌐</span>
+                <div class="card-info">
+                  <span class="card-title">Lock Current Site</span>
+                  <span id="launchSiteDomain" class="card-subtitle">domain.com</span>
+                </div>
+              </button>
+
+              <!-- Tab Lock Button -->
+              <button id="btnLaunchTab" class="launch-card-btn" data-mode="tab">
+                <span class="card-icon">📍</span>
+                <div class="card-info">
+                  <span class="card-title">Lock This Tab Only</span>
+                  <span id="launchTabUrl" class="card-subtitle">Exact url</span>
+                </div>
+              </button>
+              
+              <!-- System Warning for illegal pages -->
+              <p id="unsupportedWarning" class="warning-text hidden">⚠️ Cannot lock to system pages (e.g. chrome://)</p>
+
+              <!-- Divider -->
+              <div class="section-divider">Spaces Whitelist</div>
+
+              <!-- Workspaces List -->
+              <div id="quickWorkspacesList" class="quick-workspaces-list">
+                <!-- Programmatically populated workspaces buttons -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Focus Screen -->
+        <div id="activeScreen" class="view-panel hidden">
+          <!-- Allowed destination Info -->
+          <div class="active-lock-details">
+            <span id="activeLockBadge" class="lock-badge-pill">SITE LOCK</span>
+            <div id="activeLockTarget" class="active-lock-target">leetcode.com</div>
+            <div id="activeLockIntent" class="active-lock-intent">"Solving Arrays"</div>
+          </div>
+
+          <!-- Countdown and labels with SVG progress ring -->
+          <div class="countdown-container">
+            <svg class="countdown-svg" viewBox="0 0 200 200">
+              <circle class="countdown-ring-background" cx="100" cy="100" r="88" />
+              <circle id="activeProgressRing" class="countdown-ring-progress" cx="100" cy="100" r="88" />
+            </svg>
+            <div class="timer-content">
+              <div id="activeCountdown" class="countdown-time">--:--</div>
+              <div id="activeCountdownLabel" class="countdown-label">Focusing Active</div>
+            </div>
+          </div>
+
+          <!-- Controls -->
+          <div class="active-actions">
+            <!-- Smart Pause Dropdown Button -->
+            <div class="pause-dropdown-container">
+              <button id="btnPauseToggle" class="btn-secondary">Pause...</button>
+              <div id="pauseOptions" class="pause-options-menu hidden">
+                <button class="pause-opt-btn" data-pause="30">30 seconds</button>
+                <button class="pause-opt-btn" data-pause="120">2 minutes</button>
+                <button class="pause-opt-btn" data-pause="300">5 minutes</button>
+              </div>
+            </div>
+            
+            <button id="btnUnlock" class="btn-danger">Unlock</button>
+          </div>
+
+          <!-- System Pause Overlay (Idle/Locked Resume Prompt) -->
+          <div id="systemPausePanel" class="system-pause-panel hidden">
+            <div class="pause-prompt-card">
+              <span class="pause-prompt-icon">⏸</span>
+              <h3 id="systemPauseTitle" class="pause-prompt-title">Session Suspended</h3>
+              <p id="pausePromptText" class="pause-prompt-text">You were away for 0 minutes.</p>
+              
+              <div class="auto-resume-option">
+                <label class="remember-choice-checkbox">
+                  <input type="checkbox" id="chkAutoResume" />
+                  <span>Automatically resume when I return</span>
+                </label>
+              </div>
+              
+              <div class="pause-prompt-actions">
+                <button id="btnSystemResume" class="btn-primary-sage">Resume Session</button>
+                <button id="btnSystemEnd" class="btn-danger">End Session</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Early Exit Intent Reflection Modal -->
+        <div id="reflectionModal" class="reflection-overlay hidden">
+          <div class="reflection-card">
+            <h3 class="reflection-title">Stay Aligned</h3>
+            <p id="reflectionPromptText" class="reflection-prompt">You started this session to work on:</p>
+            <div id="reflectionIntentDisplay" class="reflection-intent-pill">Solving Arrays</div>
+            
+            <!-- V4 Outcome and Productivity Ratings -->
+            <div class="input-group text-left">
+              <label class="group-label">Did you accomplish what you intended?</label>
+              <div class="outcome-selector">
+                <button type="button" class="outcome-btn" data-outcome="yes">Yes</button>
+                <button type="button" class="outcome-btn" data-outcome="partial">Partially</button>
+                <button type="button" class="outcome-btn" data-outcome="no">No</button>
+              </div>
+            </div>
+
+            <div class="input-group text-left">
+              <label class="group-label">Productivity Rating</label>
+              <div class="rating-stars">
+                <span class="star-btn" data-rating="1">★</span>
+                <span class="star-btn" data-rating="2">★</span>
+                <span class="star-btn" data-rating="3">★</span>
+                <span class="star-btn" data-rating="4">★</span>
+                <span class="star-btn" data-rating="5">★</span>
+              </div>
+            </div>
+
+            <label class="group-label text-left">Reflection Notes (Optional)</label>
+            <textarea id="reflectionNotes" class="reflection-textarea" placeholder="Reflect on your intention here..."></textarea>
+            
+            <!-- Emergency Unlock for Level 5 Strict Tab Lock -->
+            <div id="emergencyUnlockContainer" class="input-group text-left hidden" style="margin-top: 8px;">
+              <label class="group-label">To unlock early, type UNLOCK:</label>
+              <input type="text" id="emergencyUnlockInput" class="emergency-unlock-input" placeholder="UNLOCK" autocomplete="off" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); background-color: var(--bg-input); color: var(--text-primary); outline: none;">
+            </div>
+
+            <div id="reflectionFactualStats" class="reflection-stats" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+              <div>Focused For: <strong id="reflectedDuration">12m</strong></div>
+              <div>Distractions Prevented: <strong id="reflectedDistractions">4</strong></div>
+              <div id="reflectedWarningsShownRow" class="hidden">Warnings Shown: <strong id="reflectedWarningsShown">0</strong></div>
+              <div id="reflectedWarningsIgnoredRow" class="hidden">Warnings Ignored: <strong id="reflectedWarningsIgnored">0</strong></div>
+              <div id="reflectedBlockedAttemptsRow" class="hidden">Blocked Attempts: <strong id="reflectedBlockedAttempts">0</strong></div>
+              <div id="reflectedBypassesRow" class="hidden">Temporary Bypasses: <strong id="reflectedBypasses">0</strong></div>
+            </div>
+
+            <div class="reflection-actions">
+              <button id="btnConfirmUnlock" class="btn-danger">Unlock Session</button>
+              <button id="btnCancelUnlock" class="btn-secondary">Resume Focus</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. SPACES VIEW -->
+      <section id="tabView-spaces" class="tab-view hidden">
+        <div class="workspaces-header">
+          <h2 class="view-title">Spaces</h2>
+          <button id="btnNewWorkspace" class="btn-icon-plus" title="Create Space">+</button>
+        </div>
+
+        <!-- Create/Edit Workspace Form Panel -->
+        <div id="workspaceFormPanel" class="workspace-form-panel hidden">
+          <h3 id="formPanelTitle" class="form-panel-title">New Space</h3>
+          
+          <div class="input-group">
+            <label class="group-label">Space Name</label>
+            <input type="text" id="wsNameInput" placeholder="e.g. Writing, Learning">
+          </div>
+
+          <div class="input-group">
+            <label class="group-label">Allowed Domains (one per line)</label>
+            <textarea id="wsDomainsInput" class="ws-domains-textarea" placeholder="notion.so&#10;docs.google.com"></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button id="btnSaveWorkspace" class="btn-primary-sage">Save</button>
+            <button id="btnCancelWorkspace" class="btn-secondary">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Workspaces List Container -->
+        <div id="workspacesList" class="workspaces-list">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- 5. FLOWS VIEW -->
+      <section id="tabView-flows" class="tab-view hidden">
+        <div class="workspaces-header">
+          <h2 class="view-title">Flows</h2>
+          <button id="btnNewWorkflow" class="btn-icon-plus" title="Create Flow">+</button>
+        </div>
+
+        <!-- Create/Edit Workflow Form Panel -->
+        <div id="workflowFormPanel" class="workspace-form-panel hidden">
+          <h3 id="wfFormPanelTitle" class="form-panel-title">New Flow</h3>
+          
+          <div class="input-group">
+            <label class="group-label">Flow Name</label>
+            <input type="text" id="wfNameInput" placeholder="e.g. Coding Prep, Writing draft">
+          </div>
+
+          <div class="input-group">
+            <label class="group-label">Domain Sequence (one per line, in order)</label>
+            <textarea id="wfSequenceInput" class="ws-domains-textarea" placeholder="chatgpt.com&#10;leetcode.com&#10;github.com"></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button id="btnSaveWorkflow" class="btn-primary-sage">Save</button>
+            <button id="btnCancelWorkflow" class="btn-secondary">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Workflow Library List Container -->
+        <div id="workflowsList" class="workspaces-list">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- 6. YOUTUBE VIEW -->
+      <section id="tabView-youtube" class="tab-view hidden">
+        <h2 class="view-title">YouTube Focus Filters</h2>
+
+        <!-- YouTube Presets Section -->
+        <div class="settings-group">
+          <label class="group-label">Focus Preset</label>
+          <p class="settings-desc">Choose a distraction-reduction template or customize your own.</p>
+          <div class="settings-row">
+            <span class="setting-name">Active Preset</span>
+            <select id="selectYoutubePreset" class="settings-select">
+              <option value="search_only">Search-Only Mode</option>
+              <option value="study">Study Mode</option>
+              <option value="learning">Learning Mode</option>
+              <option value="minimal">Minimal Mode</option>
+              <option value="custom">Custom</option>
+              <option value="off">Off (No Filters)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Homepage Behavior -->
+        <div class="settings-group">
+          <label class="group-label">Homepage Behavior</label>
+          <p class="settings-desc">What should happen when you visit youtube.com?</p>
+          <div class="settings-row">
+            <span class="setting-name">On Navigate to Home</span>
+            <select id="selectYoutubeHomepage" class="settings-select">
+              <option value="placeholder">Show Focus Placeholder</option>
+              <option value="subscriptions">Redirect to Subscriptions</option>
+              <option value="search">Redirect to Search Page</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Whitelisted Educational Channels -->
+        <div class="settings-group">
+          <label class="group-label">Trusted Channels Whitelist</label>
+          <p class="settings-desc">Recommendations will be filtered to only show videos from these channels when "Prefer Trusted Channels" is checked.</p>
+          
+          <div class="settings-row">
+            <div class="setting-info">
+              <span class="setting-name">Prefer Trusted Channels</span>
+              <p class="settings-desc">Only show whitelisted channel suggestions</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="chkPreferTrustedChannels">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="channel-add-row">
+            <input type="text" id="ytChannelInput" class="channel-input" placeholder="e.g. 3Blue1Brown, @Kurzgesagt">
+            <button id="btnYtAddChannel" class="btn-primary-sage-small">Add</button>
+          </div>
+          
+          <div id="ytTrustedChannelsList" class="yt-channels-list-container">
+            <!-- Programmatically populated -->
+          </div>
+        </div>
+
+        <!-- Workspace Preset Mappings -->
+        <div class="settings-group">
+          <label class="group-label">Workspace Presets Mapping</label>
+          <p class="settings-desc">Map workspaces to automated YouTube focus presets when starting a focus session.</p>
+          <div id="ytWorkspaceMappingsList" class="yt-workspace-mappings-container">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Custom Filter Toggles -->
+        <div class="settings-group">
+          <label class="group-label">Individual Filters</label>
+          <p class="settings-desc">Enable or disable specific distraction elements (locked unless preset is Custom).</p>
+          
+          <div class="settings-checkbox-grid">
+            <label class="checkbox-setting-row">
+              <input type="checkbox" id="chkHideHomeFeed" class="yt-filter-checkbox">
+              <span class="checkbox-label">Hide Home Feed</span>
+            </label>
+            <label class="checkbox-setting-row">
+              <input type="checkbox" id="chkHideShorts" class="yt-filter-checkbox">
+              <span class="checkbox-label">Hide Shorts</span>
+            </label>
+            <label class="checkbox-setting-row">
+              <input type="checkbox" id="chkHideRecommendations" class="yt-filter-checkbox">
+              <span class="checkbox-label">Hide Related/Sidebar</span>
+            </label>
+            <label class="checkbox-setting-row">
+              <input type="checkbox" id="chkHideEndScreens" class="yt-filter-checkbox">
+              <span class="checkbox-label">Hide End Screens</span>
+            </label>
+            <label class="checkbox-setting-row">
+              <input type="checkbox" id="chkHideComments" class="yt-filter-checkbox">
+              <span class="checkbox-label">Hide Comments</span>
+            </label>
+            <label class="checkbox-setting-row">
+              <input type="checkbox" id="chkHideTrending" class="yt-filter-checkbox">
+              <span class="checkbox-label">Hide Trending/Explore</span>
+            </label>
+            <label class="checkbox-setting-row">
+              <input type="checkbox" id="chkHideNotifications" class="yt-filter-checkbox">
+              <span class="checkbox-label">Hide Notification Bell</span>
+            </label>
+            <label class="checkbox-setting-row">
+              <input type="checkbox" id="chkHideCounts" class="yt-filter-checkbox">
+              <span class="checkbox-label">Hide View/Sub Counts</span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. SETTINGS VIEW -->
+      <section id="tabView-settings" class="tab-view hidden">
+        <h2 class="view-title">Settings</h2>
+
+        <!-- Focus Ring Options -->
+        <div class="settings-group">
+          <label class="group-label">Focus Ring Overlay</label>
+          <p class="settings-desc">Displays a floating indicator on focused sites. Requires host permissions.</p>
+          
+          <div class="settings-row">
+            <span class="setting-name">Overlay Mode</span>
+            <select id="selectFocusRingMode" class="settings-select">
+              <option value="off">Off (No Indicator)</option>
+              <option value="minimal">Minimal (Lock Status)</option>
+              <option value="full">Full (Status, Intent, Timer)</option>
+            </select>
+          </div>
+
+          <div id="ringPositionRow" class="settings-row hidden">
+            <span class="setting-name">Overlay Position</span>
+            <select id="selectFocusRingPosition" class="settings-select">
+              <option value="top-right">Top Right</option>
+              <option value="bottom-right">Bottom Right</option>
+              <option value="top-left">Top Left</option>
+              <option value="bottom-left">Bottom Left</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Data Retention Settings -->
+        <div class="settings-group">
+          <label class="group-label">Privacy & Retention</label>
+          <p class="settings-desc">Configure local activity tracking history lifespan.</p>
+          
+          <div class="settings-row">
+            <span class="setting-name">Keep Data For</span>
+            <select id="selectDataRetention" class="settings-select">
+              <option value="30">30 Days</option>
+              <option value="90">90 Days</option>
+              <option value="180">180 Days</option>
+              <option value="365">1 Year</option>
+              <option value="forever">Forever</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Custom Dark Mode Toggle -->
+        <div class="settings-group">
+          <div class="settings-row">
+            <div class="setting-info">
+              <span class="setting-name">Dark Mode</span>
+              <p class="settings-desc">Toggle color preference</p>
+            </div>
+            <button id="themeToggle" class="settings-theme-btn">
+              <svg id="themeIcon" class="theme-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Local Backup & Restore Section -->
+        <div class="settings-group">
+          <label class="group-label">Data Portability</label>
+          <p class="settings-desc">Export or restore your local settings, spaces, flows, and session history.</p>
+          <div class="form-actions">
+            <button id="btnExportBackup" class="btn-secondary">Export Backup (.zip)</button>
+            <button id="btnImportBackup" class="btn-secondary">Restore Backup (.zip)</button>
+            <input type="file" id="backupFileInput" style="display: none;" accept=".zip">
+          </div>
+        </div>
+
+        <!-- Sample Mock Data Generator -->
+        <div class="settings-group">
+          <label class="group-label">Developer Tools</label>
+          <p class="settings-desc">Populate demo data to inspect insights and evolution reports.</p>
+          <button id="btnGenMockData" class="btn-primary-sage" style="width: 100%;">🌿 Generate Sample Focus Data</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer Navigation -->
+    <nav class="app-nav">
+      <button id="navFocus" class="nav-item active" data-tab="focus">
+        <span class="nav-icon">🎯</span>
+        <span class="nav-label">Focus</span>
+      </button>
+      <button id="navSpaces" class="nav-item" data-tab="spaces">
+        <span class="nav-icon">💼</span>
+        <span class="nav-label">Spaces</span>
+      </button>
+      <button id="navFlows" class="nav-item" data-tab="flows">
+        <span class="nav-icon">🧩</span>
+        <span class="nav-label">Flows</span>
+      </button>
+      <button id="navInsights" class="nav-item" data-tab="insights">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Insights</span>
+      </button>
+      <button id="navYoutube" class="nav-item" data-tab="youtube">
+        <span class="nav-icon">🎬</span>
+        <span class="nav-label">YouTube</span>
+      </button>
+      <button id="navSettings" class="nav-item" data-tab="settings">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-label">Settings</span>
+      </button>
+    </nav>
+  </div>
+
+  <script src="popup.js" type="module"></script>
+</body>
+</html>

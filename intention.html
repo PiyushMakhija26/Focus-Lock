@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Focus Lock • Intention check</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="intention.css">
+</head>
+<body>
+  <div class="intention-wrapper">
+    <div class="intention-card">
+      <div class="card-header">
+        <span class="intention-icon">🌿</span>
+        <h1 id="intentionHeader" class="card-title">You are leaving your active workspace.</h1>
+      </div>
+
+      <!-- Context Cards Grid -->
+      <div class="context-grid">
+        <div class="context-card-item">
+          <span class="label">Workspace</span>
+          <span id="workspaceName" class="value-text">-</span>
+        </div>
+        
+        <div class="context-card-item">
+          <span class="label">Current Intent</span>
+          <span id="focusIntent" class="value-text">-</span>
+        </div>
+
+        <div class="context-card-item">
+          <span class="label">Destination</span>
+          <span id="destinationDomain" class="value-text">-</span>
+        </div>
+      </div>
+
+      <!-- Optional Reflection Section -->
+      <div id="reflectionSection" class="reflection-section">
+        <h3 class="section-title">Why are you opening this site?</h3>
+        
+        <div class="reflection-controls">
+          <select id="selectReason" class="dropdown-select">
+            <option value="" disabled selected>Select a reason...</option>
+            <option value="Research">Research</option>
+            <option value="Break">Break</option>
+            <option value="Need Information">Need Information</option>
+            <option value="Work Related">Work Related</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Other">Other</option>
+          </select>
+          
+          <textarea id="notesInput" class="notes-textarea" placeholder="Add a note..." rows="2"></textarea>
+        </div>
+      </div>
+
+      <!-- Action Panels -->
+      <div class="actions-panel">
+        <button id="btnReturn" class="btn-primary-sage">
+          <span>Return to Workspace</span>
+        </button>
+        
+        <!-- Open Anyway (Level 1, 2) -->
+        <button id="btnOpenAnyway" class="btn-outline">
+          <span>Open Anyway</span>
+        </button>
+
+        <!-- Temporary Access Group (Level 2, 3, 4) -->
+        <div id="tempAccessGroup" class="button-group-container">
+          <span class="group-label">Get Temporary Access</span>
+          <div class="button-group-row">
+            <button class="btn-temp btn-outline" data-time="5">5 Minutes</button>
+            <button class="btn-temp btn-outline" data-time="15">15 Minutes</button>
+            <button class="btn-temp btn-outline" data-time="30">30 Minutes</button>
+          </div>
+        </div>
+
+        <!-- Pause Focus Session Group (Level 2, 3) -->
+        <div id="pauseFocusGroup" class="button-group-container">
+          <span class="group-label">Pause Focus Session</span>
+          <div class="button-group-row">
+            <button class="btn-pause btn-outline" data-time="300">5 Minutes</button>
+            <button class="btn-pause btn-outline" data-time="900">15 Minutes</button>
+            <button class="btn-pause btn-outline" data-time="1800">30 Minutes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="intention.js"></script>
+</body>
+</html>

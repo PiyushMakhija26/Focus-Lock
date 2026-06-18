@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Focus Lock • Intention check</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="warning.css">
+</head>
+<body>
+  <div class="warning-wrapper">
+    <div class="warning-card">
+      <div class="card-header">
+        <span class="warning-icon">🌿</span>
+        <h1 class="card-title">Intention Check</h1>
+        <p class="card-subtitle">
+          The website you are trying to visit is outside your active workspace.
+        </p>
+      </div>
+
+      <!-- Workspace details badge -->
+      <div class="workspace-badge-area">
+        <span class="label">Active Workspace</span>
+        <span id="workspaceName" class="badge-text">Workspace Name</span>
+      </div>
+
+      <!-- Original requested URL -->
+      <div class="url-badge-area">
+        <span class="label">Destination</span>
+        <span id="targetUrl" class="url-text">example.com</span>
+      </div>
+
+      <!-- Mindful reason selection -->
+      <div id="reasonSection" class="reason-section">
+        <h3 class="section-title">Why are you visiting this website?</h3>
+        
+        <div class="reason-options">
+          <label class="reason-option">
+            <input type="radio" name="reason" value="Research">
+            <span class="custom-radio"></span>
+            <span class="option-label">Research</span>
+          </label>
+          
+          <label class="reason-option">
+            <input type="radio" name="reason" value="Documentation">
+            <span class="custom-radio"></span>
+            <span class="option-label">Documentation</span>
+          </label>
+          
+          <label class="reason-option">
+            <input type="radio" name="reason" value="Break">
+            <span class="custom-radio"></span>
+            <span class="option-label">Break</span>
+          </label>
+          
+          <label class="reason-option">
+            <input type="radio" name="reason" value="Work Related">
+            <span class="custom-radio"></span>
+            <span class="option-label">Work Related</span>
+          </label>
+          
+          <label class="reason-option">
+            <input type="radio" name="reason" value="Other">
+            <span class="custom-radio"></span>
+            <span class="option-label">Other</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Action Panel -->
+      <div class="actions-panel">
+        <button id="btnReturn" class="btn-primary-sage">
+          <span id="btnReturnText">Return to Workspace</span>
+        </button>
+        
+        <!-- Advisory Only Button -->
+        <button id="btnContinueOnce" class="btn-outline hidden">
+          <span>Continue Once</span>
+        </button>
+        
+        <div id="softLockActions" class="action-grid">
+          <button id="btnContinue5" class="btn-outline" disabled>
+            <span>Continue for 5 min</span>
+          </button>
+          
+          <button id="btnOpenAnyway" class="btn-outline" disabled>
+            <span>Open Anyway</span>
+          </button>
+          
+          <button id="btnPause2" class="btn-outline" disabled>
+            <span>Pause Focus</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="warning.js"></script>
+</body>
+</html>

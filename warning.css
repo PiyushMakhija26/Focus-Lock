@@ -1,0 +1,289 @@
+/* Focus Lock - Calming Override Page Style */
+
+:root {
+  --bg-app: #f6f8f6;
+  --bg-card: #ffffff;
+  --text-primary: #212c24;
+  --text-secondary: #5a6d60;
+  --text-muted: #869b8d;
+  --border-color: #e4ebe5;
+  
+  --color-sage: #577861;
+  --color-sage-light: #eef3ef;
+  --color-sage-hover: #45604d;
+  
+  --color-blue: #4e808c;
+  --color-blue-light: #ecf3f4;
+  
+  --color-amber: #d59e45;
+  --color-amber-light: #fcf6eb;
+  
+  --font-family: 'Outfit', sans-serif;
+  --shadow-lg: 0 20px 48px rgba(44, 58, 48, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-app: #121613;
+    --bg-card: #1b211d;
+    --text-primary: #ecf3ee;
+    --text-secondary: #97ab9e;
+    --text-muted: #6b7d72;
+    --border-color: #29342c;
+    
+    --color-sage: #729a7e;
+    --color-sage-light: #1c2720;
+    --color-sage-hover: #86aa91;
+    
+    --color-blue: #6ba2b0;
+    --color-blue-light: #19272b;
+    
+    --color-amber: #e8b25d;
+    --color-amber-light: #2d2315;
+    
+    --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.4);
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+}
+
+.warning-wrapper {
+  width: 100%;
+  max-width: 500px;
+}
+
+.warning-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  text-align: center;
+}
+
+.card-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.warning-icon {
+  font-size: 48px;
+}
+
+.card-title {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.card-subtitle {
+  color: var(--text-secondary);
+  font-size: 15px;
+  max-width: 380px;
+  line-height: 1.6;
+}
+
+/* Badge Areas */
+.workspace-badge-area,
+.url-badge-area {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-size: 13px;
+  text-align: left;
+}
+
+.workspace-badge-area .label,
+.url-badge-area .label {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+}
+
+.workspace-badge-area .badge-text {
+  font-weight: 600;
+  color: var(--color-sage);
+}
+
+.url-badge-area .url-text {
+  font-family: monospace;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
+}
+
+/* Reasons section */
+.reason-section {
+  text-align: left;
+  border-top: 1px solid var(--border-color);
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.reason-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reason-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reason-option:hover {
+  background-color: var(--bg-app);
+}
+
+.reason-option input[type="radio"] {
+  display: none;
+}
+
+.custom-radio {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--text-muted);
+  display: inline-block;
+  position: relative;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.reason-option input[type="radio"]:checked + .custom-radio {
+  border-color: var(--color-sage);
+}
+
+.reason-option input[type="radio"]:checked + .custom-radio::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  background-color: var(--color-sage);
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.reason-option input[type="radio"]:checked ~ .option-label {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.option-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* Actions Panel */
+.actions-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 20px;
+}
+
+.btn-primary-sage {
+  background-color: var(--color-sage);
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 4px 14px rgba(87, 120, 97, 0.15);
+}
+
+.btn-primary-sage:hover {
+  background-color: var(--color-sage-hover);
+  transform: translateY(-1px);
+}
+
+.btn-primary-sage:active {
+  transform: translateY(1px);
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.action-grid button:last-child {
+  grid-column: span 2;
+}
+
+.btn-outline {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-outline:hover:not(:disabled) {
+  background-color: var(--bg-app);
+  border-color: var(--text-muted);
+}
+
+.btn-outline:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-outline:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
