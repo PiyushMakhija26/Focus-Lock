@@ -1,6 +1,6 @@
 # Focus Lock — Local Attention Intelligence & Voluntary Enforcement Platform
 
-Focus Lock is a **local-first, privacy-first attention intelligence platform** and voluntary browser-enforcement tool. All data collection, subsequence mining, recommendation generation, scorecards, directed graphs, and backup compilation occur entirely on your local machine.
+Focus Lock is a **local-first, privacy-first attention intelligence platform** and voluntary browser-enforcement tool. All data collection, recommendation generation, scorecards, directed graphs, and backup compilation occur entirely on your local machine.
 
 No accounts. No telemetry. No servers. No cloud infrastructure. All data remains 100% on-device.
 
@@ -26,23 +26,19 @@ No accounts. No telemetry. No servers. No cloud infrastructure. All data remains
 * **Accurate Focus Duration**: Computes session statistics and daily reports based on true accumulated active duration (`activeTimeMs`) instead of simple clock differences (`endTime - startTime`), excluding idle and locked segments.
 * **Personal Attention Graph**: A circular directed node-link SVG graph displaying transition vectors (stroke thickness indicating count) between Workspace and Domain nodes with marker arrowheads.
 * **Qualitative Attention Scorecards**: Transparent weekly ratings (Focus Quality, Context Switching, Deep Work, Workflow Stability) with clickable, inspectable mathematical calculation rules.
-* **Narrative-First Reports**: Top-level deterministic story card outlining key trends, successfully completed workflows, and emerging distraction patterns.
+* **Narrative-First Reports**: Top-level deterministic story card outlining key trends and emerging distraction patterns.
 
-### 3. Workflow & Sequence Automation
-* **Domain Sequence Mining**: Runs Apriori-based subsequence mining across historical focus sessions to identify recurring sequences (e.g., `chatgpt.com → leetcode.com → github.com`).
-* **Workflow Library**: Full CRUD (Create, Read, Update, Delete) management interface for saved domain sequences and workflows.
-* **Workflow Lock Execution**: Start a session restricted to workflow sequences with workspace locking.
+### 3. YouTube Focus Filters
+* **Core Content Hiding**: Easily toggle content hiding for a focused viewing experience:
+  * **Hide Home Feed**: Replaces the YouTube homepage feed with a centered glassmorphic mindfulness card.
+  * **Hide Shorts**: Blocks sidebar links, carousel feeds, explore page tabs, and search results relating to Shorts.
+  * **Hide Related/Sidebar**: Entirely hides the right-side related video recommendation column on watch pages.
+  * **Hide Comments**: Removes the comments section below video players.
 
-### 4. Content Moderation & YouTube Filters
-* **YouTube Focus Filters**: Custom presets (*Search-Only Mode*, *Study Mode*, *Learning Mode*, *Minimal Mode*, *Custom*, and *Off*).
-* **Trusted Channel Whitelisting**: Restricts YouTube watch pages to whitelisted educational channels (handles `@` names and subpages) and hides recommendations from other creators.
-* **Shorts Removal**: Hides Shorts shelf, sidebar links, explore page categories, watch recommendation cards, and search results.
-* **Workspace Preset Mappings**: Maps focus workspaces to automated presets on session start, and restores original configuration on session stop.
-
-### 5. Data Security, Backup & Portability
+### 4. Data Security, Backup & Portability
 * **Database Cleanup Migration**: Run on start/install, this migration scrubs invalid hostnames from IndexedDB logs and stores lightweight checkpoints (`preMigrationCounts` and `postMigrationCounts`) in local storage to track migration integrity.
 * **Strict Domain Validation**: Uses standard URL hostname parsing to block local/internal hostnames (`localhost`, `chrome://`, `about:blank`, devtools, etc.) and non-TLD entries from polluting logs.
-* **ZIP Backup & Restoration**: Export settings, workspaces, IndexedDB focus sessions, and activity logs into an uncompressed `.zip` file using raw binary byte building, and import them seamlessly.
+* **ZIP Backup & Portability**: Export settings, workspaces, IndexedDB focus sessions, and activity logs into an uncompressed `.zip` file using raw binary byte building, and import them seamlessly.
 
 ---
 
@@ -61,9 +57,9 @@ Extension project/
 ├── content.js              # In-page Focus Ring overlay script
 ├── content.css             # Glassmorphic overlay styles
 ├── youtube-content.css     # Targeted CSS filters for YouTube distraction elements
-├── popup.html              # Interface with Workflow Library, Scorecards, Backup drops & YouTube filters
+├── popup.html              # Interface with Workspaces, Scorecards, Backup drops & YouTube filters
 ├── popup.css               # Popup styling variables, grid layout & YouTube tab styles
-├── popup.js                # UI manager, workflow CRUD, outcome modal & YouTube hooks
+├── popup.js                # UI manager, workspaces CRUD, outcome modal & YouTube hooks
 ├── report.html             # Full-screen report page dashboard template
 ├── report.js               # Report data loading & directed graph SVG rendering
 ├── siteFilters/            # Site-specific content scripts and placeholders
@@ -73,12 +69,11 @@ Extension project/
 │   └── twitter.js          # Twitter placeholder
 ├── modules/                # Core ES Modules
     ├── storage.js          # Default state cache, V4/V4.5 variables & schema version
-    ├── enforcement.js      # URL matches, snaps, workflow validations, and domain filters
+    ├── enforcement.js      # URL matches, snaps, workspace validations, and domain filters
     ├── workspaces.js       # Workspace whitelist CRUD & temp whitelisting
     ├── analytics.js        # Distraction prevented metrics & daily statistics
     ├── timers.js           # Alarm managers, badges, focus session lifecycles, and idle/lock routers
-    ├── youtubeFilters.js   # Preset resolution, session backups, and workspace triggers
-    └── intelligence.js     # IndexedDB migrations, subsequence mining & scorecards
+    └── intelligence.js     # IndexedDB migrations & scorecards
 ```
 
 ---
@@ -156,20 +151,7 @@ const tldRegex = /^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/;
 return tldRegex.test(domain);
 ```
 
-### 4. Relative Subsequence Matching (Apriori Mining)
-To see if a user's sequence matches a workflow, the app checks if the workflow list exists as a subsequence (order-preserving but non-consecutive) within the session history:
-```javascript
-function isSubsequence(sub, main) {
-  let i = 0, j = 0;
-  while (i < sub.length && j < main.length) {
-    if (sub[i] === main[j]) i++;
-    j++;
-  }
-  return i === sub.length;
-}
-```
-
-### 5. Dynamic SVG Directed Graph Render Coordinates
+### 4. Dynamic SVG Directed Graph Render Coordinates
 Directed graph edges must start and end at node boundaries rather than node centers. The app computes trigonometric offset points to draw arrows cleanly:
 ```javascript
 const dx = p2.x - p1.x;
@@ -184,7 +166,7 @@ const x2 = p2.x - p2.radius * ux;
 const y2 = p2.y - p2.radius * uy;
 ```
 
-### 6. Safe Message Response Channel Pattern
+### 5. Safe Message Response Channel Pattern
 Background listeners catch async exceptions to avoid port closures before a response is received, keeping channels stable:
 ```javascript
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
