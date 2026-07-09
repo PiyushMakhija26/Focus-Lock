@@ -92,8 +92,7 @@ const ringPositionRow = document.getElementById('ringPositionRow');
 let activeTabInfo = null;
 let selectedDuration = 0; // minutes, 0 = indefinite
 let activeWorkspaceEditId = null;
-let activeWorkflowId = '';
-let activeWorkflowEditId = null;
+
 let countdownInterval = null;
 let selectedOutcome = null;
 let selectedRating = null;
@@ -106,7 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initTimerSelector();
   initFocusActions();
   initSpaceCRUD();
-  initFlowCRUD();
+
   initSettingsListeners();
   initInsightsAndBackupListeners();
   initYoutubeListeners();
@@ -237,8 +236,7 @@ function switchTab(tabId) {
     syncActiveHomeState();
   } else if (tabId === 'spaces') {
     renderSpacesList();
-  } else if (tabId === 'flows') {
-    renderFlowsList();
+
   } else if (tabId === 'settings') {
     syncSettingsView();
   } else if (tabId === 'youtube') {
@@ -1107,412 +1105,46 @@ async function unregisterDynamicContentScript() {
   }
 }
 
-// Flows CRUD
-function initFlowCRUD() {
-  const btnNewWorkflow = document.getElementById('btnNewWorkflow');
-  const workflowFormPanel = document.getElementById('workflowFormPanel');
-  const wfFormPanelTitle = document.getElementById('wfFormPanelTitle');
-  const wfNameInput = document.getElementById('wfNameInput');
-  const wfSequenceInput = document.getElementById('wfSequenceInput');
-  const btnSaveWorkflow = document.getElementById('btnSaveWorkflow');
-  const btnCancelWorkflow = document.getElementById('btnCancelWorkflow');
-
-  if (btnNewWorkflow) {
-    btnNewWorkflow.addEventListener('click', () => {
-      activeWorkflowEditId = null;
-      wfFormPanelTitle.textContent = 'New Flow';
-      wfNameInput.value = '';
-      wfSequenceInput.value = '';
-      workflowFormPanel.classList.remove('hidden');
-    });
-  }
-
-  if (btnCancelWorkflow) {
-    btnCancelWorkflow.addEventListener('click', () => {
-      workflowFormPanel.classList.add('hidden');
-    });
-  }
-
-  if (btnSaveWorkflow) {
-    btnSaveWorkflow.addEventListener('click', async () => {
-      const name = wfNameInput.value.trim();
-      const sequenceText = wfSequenceInput.value.trim();
-
-      if (!name) {
-        wfNameInput.focus();
-        return;
-      }
-
-      const sequence = sequenceText.split('\n').map(d => d.trim()).filter(Boolean);
-      if (sequence.length === 0) {
-        wfSequenceInput.focus();
-        return;
-      }
-
-      const { saveWorkflow } = await import('./modules/intelligence.js');
-
-      const workflowId = activeWorkflowEditId || `wf-${Date.now()}`;
-      const workflow = {
-        workflowId,
-        name,
-        sequence,
-        source: activeWorkflowEditId ? 'discovered' : 'manual',
-        createdAt: Date.now()
-      };
-
-      await saveWorkflow(workflow);
-      workflowFormPanel.classList.add('hidden');
-      renderFlowsList();
-    });
-  }
-}
-
-async function renderFlowsList() {
-  const workflowsList = document.getElementById('workflowsList');
-  if (!workflowsList) return;
-
-  const { readAllDB } = await import('./modules/intelligence.js');
-  const workflows = await readAllDB('savedWorkflows');
-  workflowsList.innerHTML = '';
-
-  if (workflows.length === 0) {
-    workflowsList.innerHTML = '<p class="empty-history">No saved flows. Create one or accept a discovery recommendation.</p>';
-    return;
-  }
-
-  const sessions = await readAllDB('focusSessions');
-
-  workflows.forEach(wf => {
-    let matches = 0;
-    let successes = 0;
-    
-    const isSubseq = (sub, main) => {
-      let i = 0;
-      let j = 0;
-      while (i < sub.length && j < main.length) {
-        if (sub[i] === main[j]) i++;
-        j++;
-      }
-      return i === sub.length;
-    };
-
-    sessions.forEach(s => {
-      if (isSubseq(wf.sequence, s.domains || [])) {
-        matches++;
-        if (s.outcome === 'yes') successes++;
-      }
-    });
-
-    const successRate = matches > 0 ? successes / matches : 0.0;
-    const successPercent = Math.round(successRate * 100);
-
-    const item = document.createElement('div');
-    item.className = 'workspace-item';
-
-    const mainRow = document.createElement('div');
-    mainRow.className = 'workspace-main-row';
-
-    const titleGroup = document.createElement('div');
-    titleGroup.className = 'workspace-title-group';
-
-    const nameSpan = document.createElement('span');
-    nameSpan.className = 'workspace-name';
-    nameSpan.textContent = wf.name;
-
-    const countSpan = document.createElement('span');
-    countSpan.className = 'workspace-domains-count';
-    countSpan.textContent = `${wf.sequence.length} domains • Success Rate: ${successPercent}% (${matches} sessions)`;
-
-    titleGroup.appendChild(nameSpan);
-    titleGroup.appendChild(countSpan);
-
-    const actionsGroup = document.createElement('div');
-    actionsGroup.className = 'workspace-actions-group';
-
-    const btnStart = document.createElement('button');
-    btnStart.className = 'btn-action-small primary';
-    btnStart.style.backgroundColor = 'var(--color-sage)';
-    btnStart.style.color = '#white';
-    btnStart.textContent = 'Start';
-    btnStart.addEventListener('click', () => {
-      triggerLaunchSession('workspace', wf.workflowId);
-      switchTab('focus');
-    });
-
-    const btnEdit = document.createElement('button');
-    btnEdit.className = 'btn-action-small';
-    btnEdit.textContent = 'Edit';
-    btnEdit.addEventListener('click', () => {
-      activeWorkflowEditId = wf.workflowId;
-      const workflowFormPanel = document.getElementById('workflowFormPanel');
-      const wfFormPanelTitle = document.getElementById('wfFormPanelTitle');
-      const wfNameInput = document.getElementById('wfNameInput');
-      const wfSequenceInput = document.getElementById('wfSequenceInput');
-
-      wfFormPanelTitle.textContent = 'Edit Flow';
-      wfNameInput.value = wf.name;
-      wfSequenceInput.value = wf.sequence.join('\n');
-      workflowFormPanel.classList.remove('hidden');
-    });
-
-    const btnDelete = document.createElement('button');
-    btnDelete.className = 'btn-action-small danger';
-    btnDelete.textContent = 'Delete';
-    btnDelete.addEventListener('click', async () => {
-      if (confirm(`Are you sure you want to delete flow "${wf.name}"?`)) {
-        const { deleteSavedWorkflow } = await import('./modules/intelligence.js');
-        await deleteSavedWorkflow(wf.workflowId);
-        renderFlowsList();
-      }
-    });
-
-    actionsGroup.appendChild(btnStart);
-    actionsGroup.appendChild(btnEdit);
-    actionsGroup.appendChild(btnDelete);
-
-    mainRow.appendChild(titleGroup);
-    mainRow.appendChild(actionsGroup);
-    item.appendChild(mainRow);
-
-    const seqPanel = document.createElement('div');
-    seqPanel.className = 'workspace-expand-domains';
-    seqPanel.style.marginTop = '6px';
-    seqPanel.textContent = wf.sequence.join(' → ');
-    item.appendChild(seqPanel);
-
-    workflowsList.appendChild(item);
-  });
-}
-
-
 
 function initYoutubeListeners() {
-  const selectYoutubePreset = document.getElementById('selectYoutubePreset');
-  const selectYoutubeHomepage = document.getElementById('selectYoutubeHomepage');
-  const chkPreferTrustedChannels = document.getElementById('chkPreferTrustedChannels');
-  const ytChannelInput = document.getElementById('ytChannelInput');
-  const btnYtAddChannel = document.getElementById('btnYtAddChannel');
-
-  if (selectYoutubePreset) {
-    selectYoutubePreset.addEventListener('change', async (e) => {
-      const preset = e.target.value;
-      if (preset !== 'custom') {
-        const YOUTUBE_PRESETS = {
-          search_only: { hideHomeFeed: true, hideShorts: true, hideRecommendations: true, hideEndScreens: true, hideComments: true, hideTrending: true, hideNotifications: true, hideCounts: true },
-          study: { hideHomeFeed: true, hideShorts: true, hideRecommendations: true, hideEndScreens: true, hideComments: true, hideTrending: true, hideNotifications: false, hideCounts: false },
-          learning: { hideHomeFeed: true, hideShorts: true, hideRecommendations: false, hideEndScreens: true, hideComments: false, hideTrending: true, hideNotifications: false, hideCounts: false },
-          minimal: { hideHomeFeed: false, hideShorts: true, hideRecommendations: false, hideEndScreens: false, hideComments: false, hideTrending: true, hideNotifications: false, hideCounts: false },
-          off: { hideHomeFeed: false, hideShorts: false, hideRecommendations: false, hideEndScreens: false, hideComments: false, hideTrending: false, hideNotifications: false, hideCounts: false }
-        };
-        const filters = YOUTUBE_PRESETS[preset];
-        if (filters) {
-          await setStorage({
-            youtubePreset: preset,
-            ...filters
-          });
-        }
-      } else {
-        await setStorage({ youtubePreset: 'custom' });
-      }
-      renderYoutubeView();
-    });
-  }
-
-  if (selectYoutubeHomepage) {
-    selectYoutubeHomepage.addEventListener('change', async (e) => {
-      await setStorage({ youtubeHomepageBehavior: e.target.value });
-    });
-  }
-
-  if (chkPreferTrustedChannels) {
-    chkPreferTrustedChannels.addEventListener('change', async (e) => {
-      await setStorage({ youtubePreferTrustedChannels: e.target.checked });
-    });
-  }
-
-  if (btnYtAddChannel && ytChannelInput) {
-    const addChannelAction = async () => {
-      const channelName = ytChannelInput.value.trim();
-      if (!channelName) return;
-      
-      const storage = await getStorage(['youtubeTrustedChannels']);
-      const currentList = storage.youtubeTrustedChannels || [];
-      if (!currentList.includes(channelName)) {
-        currentList.push(channelName);
-        await setStorage({ youtubeTrustedChannels: currentList });
-      }
-      ytChannelInput.value = '';
-      renderYoutubeView();
-    };
-
-    btnYtAddChannel.addEventListener('click', addChannelAction);
-    
-    ytChannelInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        addChannelAction();
-      }
-    });
-  }
-
   const filterToggles = [
     { id: 'chkHideHomeFeed', key: 'hideHomeFeed' },
     { id: 'chkHideShorts', key: 'hideShorts' },
     { id: 'chkHideRecommendations', key: 'hideRecommendations' },
-    { id: 'chkHideEndScreens', key: 'hideEndScreens' },
-    { id: 'chkHideComments', key: 'hideComments' },
-    { id: 'chkHideTrending', key: 'hideTrending' },
-    { id: 'chkHideNotifications', key: 'hideNotifications' },
-    { id: 'chkHideCounts', key: 'hideCounts' }
+    { id: 'chkHideComments', key: 'hideComments' }
   ];
 
   filterToggles.forEach(toggle => {
     const el = document.getElementById(toggle.id);
     if (el) {
       el.addEventListener('change', async (e) => {
-        const storage = await getStorage(['youtubePreset']);
-        if (storage.youtubePreset === 'custom') {
-          const update = {};
-          update[toggle.key] = e.target.checked;
-          await setStorage(update);
-        }
+        const update = {};
+        update[toggle.key] = e.target.checked;
+        await setStorage(update);
       });
     }
   });
 }
 
 async function renderYoutubeView() {
-  const selectYoutubePreset = document.getElementById('selectYoutubePreset');
-  const selectYoutubeHomepage = document.getElementById('selectYoutubeHomepage');
-  const chkPreferTrustedChannels = document.getElementById('chkPreferTrustedChannels');
-  const ytTrustedChannelsList = document.getElementById('ytTrustedChannelsList');
-  const ytWorkspaceMappingsList = document.getElementById('ytWorkspaceMappingsList');
-
   const chkHideHomeFeed = document.getElementById('chkHideHomeFeed');
   const chkHideShorts = document.getElementById('chkHideShorts');
   const chkHideRecommendations = document.getElementById('chkHideRecommendations');
-  const chkHideEndScreens = document.getElementById('chkHideEndScreens');
   const chkHideComments = document.getElementById('chkHideComments');
-  const chkHideTrending = document.getElementById('chkHideTrending');
-  const chkHideNotifications = document.getElementById('chkHideNotifications');
-  const chkHideCounts = document.getElementById('chkHideCounts');
 
   const keys = [
-    'youtubePreset',
-    'youtubeHomepageBehavior',
-    'youtubeTrustedChannels',
-    'youtubePreferTrustedChannels',
-    'youtubeWorkspacePresets',
     'hideHomeFeed',
     'hideShorts',
     'hideRecommendations',
-    'hideEndScreens',
-    'hideComments',
-    'hideTrending',
-    'hideNotifications',
-    'hideCounts'
+    'hideComments'
   ];
   
   const settings = await getStorage(keys);
   
-  if (selectYoutubePreset) selectYoutubePreset.value = settings.youtubePreset || 'off';
-  if (selectYoutubeHomepage) selectYoutubeHomepage.value = settings.youtubeHomepageBehavior || 'placeholder';
-  if (chkPreferTrustedChannels) chkPreferTrustedChannels.checked = !!settings.youtubePreferTrustedChannels;
-
-  // Set filter checkboxes
   if (chkHideHomeFeed) chkHideHomeFeed.checked = !!settings.hideHomeFeed;
   if (chkHideShorts) chkHideShorts.checked = !!settings.hideShorts;
   if (chkHideRecommendations) chkHideRecommendations.checked = !!settings.hideRecommendations;
-  if (chkHideEndScreens) chkHideEndScreens.checked = !!settings.hideEndScreens;
   if (chkHideComments) chkHideComments.checked = !!settings.hideComments;
-  if (chkHideTrending) chkHideTrending.checked = !!settings.hideTrending;
-  if (chkHideNotifications) chkHideNotifications.checked = !!settings.hideNotifications;
-  if (chkHideCounts) chkHideCounts.checked = !!settings.hideCounts;
-
-  // Enable/disable checkboxes based on custom mode
-  const isCustom = settings.youtubePreset === 'custom';
-  const checkboxes = [
-    chkHideHomeFeed, chkHideShorts, chkHideRecommendations, chkHideEndScreens,
-    chkHideComments, chkHideTrending, chkHideNotifications, chkHideCounts
-  ];
-  checkboxes.forEach(chk => {
-    if (chk) chk.disabled = !isCustom;
-  });
-
-  // Render whitelisted channel tags
-  if (ytTrustedChannelsList) {
-    ytTrustedChannelsList.innerHTML = '';
-    const trustedList = settings.youtubeTrustedChannels || [];
-    if (trustedList.length > 0) {
-      trustedList.forEach(channel => {
-        const tag = document.createElement('div');
-        tag.className = 'yt-channel-tag';
-        tag.innerHTML = `
-          <span>${channel}</span>
-          <button class="btn-remove-tag" data-channel="${channel}">×</button>
-        `;
-        ytTrustedChannelsList.appendChild(tag);
-      });
-      
-      // Attach click listeners to remove tags
-      ytTrustedChannelsList.querySelectorAll('.btn-remove-tag').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-          const toRemove = e.currentTarget.dataset.channel;
-          const storage = await getStorage(['youtubeTrustedChannels']);
-          const currentList = storage.youtubeTrustedChannels || [];
-          const updatedList = currentList.filter(c => c !== toRemove);
-          await setStorage({ youtubeTrustedChannels: updatedList });
-          renderYoutubeView();
-        });
-      });
-    } else {
-      ytTrustedChannelsList.innerHTML = '<p class="empty-history" style="width:100%; text-align:center; padding: 10px 0;">No trusted channels whitelisted.</p>';
-    }
-  }
-
-  // Render workspace presets mappings
-  if (ytWorkspaceMappingsList) {
-    ytWorkspaceMappingsList.innerHTML = '';
-    
-    // Retrieve latest workspaces and current mappings
-    const wsStorage = await getStorage(['workspaces', 'youtubeWorkspacePresets']);
-    const workspaces = wsStorage.workspaces || [];
-    const mappings = wsStorage.youtubeWorkspacePresets || {};
-    
-    if (workspaces.length === 0) {
-      ytWorkspaceMappingsList.innerHTML = '<p class="empty-history">No workspaces configured.</p>';
-    } else {
-      workspaces.forEach(ws => {
-        const row = document.createElement('div');
-        row.className = 'yt-workspace-mapping-row';
-        const currentPreset = mappings[ws.id] || 'off';
-        
-        row.innerHTML = `
-          <span class="yt-ws-name">${ws.name}</span>
-          <select class="settings-select yt-ws-select" data-ws-id="${ws.id}">
-            <option value="search_only" ${currentPreset === 'search_only' ? 'selected' : ''}>Search-Only</option>
-            <option value="study" ${currentPreset === 'study' ? 'selected' : ''}>Study Mode</option>
-            <option value="learning" ${currentPreset === 'learning' ? 'selected' : ''}>Learning Mode</option>
-            <option value="minimal" ${currentPreset === 'minimal' ? 'selected' : ''}>Minimal Mode</option>
-            <option value="off" ${currentPreset === 'off' ? 'selected' : ''}>Off</option>
-          </select>
-        `;
-        ytWorkspaceMappingsList.appendChild(row);
-      });
-      
-      // Attach change listeners to mapping selects
-      ytWorkspaceMappingsList.querySelectorAll('.yt-ws-select').forEach(select => {
-        select.addEventListener('change', async (e) => {
-          const wsId = e.currentTarget.dataset.wsId;
-          const presetVal = e.currentTarget.value;
-          
-          const storage = await getStorage(['youtubeWorkspacePresets']);
-          const currentMappings = storage.youtubeWorkspacePresets || {};
-          currentMappings[wsId] = presetVal;
-          await setStorage({ youtubeWorkspacePresets: currentMappings });
-        });
-      });
-    }
-  }
 }
 
 // Initialize and restore choice for Enforcement Level Selector

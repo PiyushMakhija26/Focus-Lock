@@ -2,7 +2,6 @@
 import { getFocusState } from './storage.js';
 import { getWorkspaces, isDomainAllowedInWorkspace, isTempWhitelisted, matchDomain } from './workspaces.js';
 import { recordDistraction } from './analytics.js';
-import { getSavedWorkflow } from './intelligence.js';
 
 // Memory-based lookup cache for allowed/blocked domain validation
 class RuleCache {
@@ -154,15 +153,7 @@ export async function isUrlAllowed(url, state) {
         // 2. Check workspace whitelist
         const workspaces = await getWorkspaces();
         let activeWs = workspaces.find(w => w.name === allowedDestination || w.id === state.activeWorkspaceId);
-        if (!activeWs && state.activeWorkspaceId) {
-          const wf = await getSavedWorkflow(state.activeWorkspaceId);
-          if (wf) {
-            activeWs = {
-              name: wf.name,
-              domains: wf.sequence
-            };
-          }
-        }
+
         if (activeWs) {
           allowed = isDomainAllowedInWorkspace(hostname, activeWs.domains);
         } else if (lockMode === 'site') {

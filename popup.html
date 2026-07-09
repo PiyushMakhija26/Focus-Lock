@@ -332,113 +332,16 @@
         </div>
       </section>
 
-      <!-- 5. FLOWS VIEW -->
-      <section id="tabView-flows" class="tab-view hidden">
-        <div class="workspaces-header">
-          <h2 class="view-title">Flows</h2>
-          <button id="btnNewWorkflow" class="btn-icon-plus" title="Create Flow">+</button>
-        </div>
 
-        <!-- Create/Edit Workflow Form Panel -->
-        <div id="workflowFormPanel" class="workspace-form-panel hidden">
-          <h3 id="wfFormPanelTitle" class="form-panel-title">New Flow</h3>
-          
-          <div class="input-group">
-            <label class="group-label">Flow Name</label>
-            <input type="text" id="wfNameInput" placeholder="e.g. Coding Prep, Writing draft">
-          </div>
 
-          <div class="input-group">
-            <label class="group-label">Domain Sequence (one per line, in order)</label>
-            <textarea id="wfSequenceInput" class="ws-domains-textarea" placeholder="chatgpt.com&#10;leetcode.com&#10;github.com"></textarea>
-          </div>
-
-          <div class="form-actions">
-            <button id="btnSaveWorkflow" class="btn-primary-sage">Save</button>
-            <button id="btnCancelWorkflow" class="btn-secondary">Cancel</button>
-          </div>
-        </div>
-
-        <!-- Workflow Library List Container -->
-        <div id="workflowsList" class="workspaces-list">
-          <!-- Dynamically populated -->
-        </div>
-      </section>
-
-      <!-- 6. YOUTUBE VIEW -->
+      <!-- 5. YOUTUBE VIEW -->
       <section id="tabView-youtube" class="tab-view hidden">
         <h2 class="view-title">YouTube Focus Filters</h2>
-
-        <!-- YouTube Presets Section -->
-        <div class="settings-group">
-          <label class="group-label">Focus Preset</label>
-          <p class="settings-desc">Choose a distraction-reduction template or customize your own.</p>
-          <div class="settings-row">
-            <span class="setting-name">Active Preset</span>
-            <select id="selectYoutubePreset" class="settings-select">
-              <option value="search_only">Search-Only Mode</option>
-              <option value="study">Study Mode</option>
-              <option value="learning">Learning Mode</option>
-              <option value="minimal">Minimal Mode</option>
-              <option value="custom">Custom</option>
-              <option value="off">Off (No Filters)</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Homepage Behavior -->
-        <div class="settings-group">
-          <label class="group-label">Homepage Behavior</label>
-          <p class="settings-desc">What should happen when you visit youtube.com?</p>
-          <div class="settings-row">
-            <span class="setting-name">On Navigate to Home</span>
-            <select id="selectYoutubeHomepage" class="settings-select">
-              <option value="placeholder">Show Focus Placeholder</option>
-              <option value="subscriptions">Redirect to Subscriptions</option>
-              <option value="search">Redirect to Search Page</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Whitelisted Educational Channels -->
-        <div class="settings-group">
-          <label class="group-label">Trusted Channels Whitelist</label>
-          <p class="settings-desc">Recommendations will be filtered to only show videos from these channels when "Prefer Trusted Channels" is checked.</p>
-          
-          <div class="settings-row">
-            <div class="setting-info">
-              <span class="setting-name">Prefer Trusted Channels</span>
-              <p class="settings-desc">Only show whitelisted channel suggestions</p>
-            </div>
-            <label class="toggle-switch">
-              <input type="checkbox" id="chkPreferTrustedChannels">
-              <span class="slider"></span>
-            </label>
-          </div>
-
-          <div class="channel-add-row">
-            <input type="text" id="ytChannelInput" class="channel-input" placeholder="e.g. 3Blue1Brown, @Kurzgesagt">
-            <button id="btnYtAddChannel" class="btn-primary-sage-small">Add</button>
-          </div>
-          
-          <div id="ytTrustedChannelsList" class="yt-channels-list-container">
-            <!-- Programmatically populated -->
-          </div>
-        </div>
-
-        <!-- Workspace Preset Mappings -->
-        <div class="settings-group">
-          <label class="group-label">Workspace Presets Mapping</label>
-          <p class="settings-desc">Map workspaces to automated YouTube focus presets when starting a focus session.</p>
-          <div id="ytWorkspaceMappingsList" class="yt-workspace-mappings-container">
-            <!-- Dynamically populated -->
-          </div>
-        </div>
 
         <!-- Custom Filter Toggles -->
         <div class="settings-group">
           <label class="group-label">Individual Filters</label>
-          <p class="settings-desc">Enable or disable specific distraction elements (locked unless preset is Custom).</p>
+          <p class="settings-desc">Choose which parts of YouTube to block.</p>
           
           <div class="settings-checkbox-grid">
             <label class="checkbox-setting-row">
@@ -454,24 +357,8 @@
               <span class="checkbox-label">Hide Related/Sidebar</span>
             </label>
             <label class="checkbox-setting-row">
-              <input type="checkbox" id="chkHideEndScreens" class="yt-filter-checkbox">
-              <span class="checkbox-label">Hide End Screens</span>
-            </label>
-            <label class="checkbox-setting-row">
               <input type="checkbox" id="chkHideComments" class="yt-filter-checkbox">
               <span class="checkbox-label">Hide Comments</span>
-            </label>
-            <label class="checkbox-setting-row">
-              <input type="checkbox" id="chkHideTrending" class="yt-filter-checkbox">
-              <span class="checkbox-label">Hide Trending/Explore</span>
-            </label>
-            <label class="checkbox-setting-row">
-              <input type="checkbox" id="chkHideNotifications" class="yt-filter-checkbox">
-              <span class="checkbox-label">Hide Notification Bell</span>
-            </label>
-            <label class="checkbox-setting-row">
-              <input type="checkbox" id="chkHideCounts" class="yt-filter-checkbox">
-              <span class="checkbox-label">Hide View/Sub Counts</span>
             </label>
           </div>
         </div>
@@ -549,7 +436,7 @@
         <!-- Local Backup & Restore Section -->
         <div class="settings-group">
           <label class="group-label">Data Portability</label>
-          <p class="settings-desc">Export or restore your local settings, spaces, flows, and session history.</p>
+          <p class="settings-desc">Export or restore your local settings, spaces, and session history.</p>
           <div class="form-actions">
             <button id="btnExportBackup" class="btn-secondary">Export Backup (.zip)</button>
             <button id="btnImportBackup" class="btn-secondary">Restore Backup (.zip)</button>
@@ -576,10 +463,7 @@
         <span class="nav-icon">💼</span>
         <span class="nav-label">Spaces</span>
       </button>
-      <button id="navFlows" class="nav-item" data-tab="flows">
-        <span class="nav-icon">🧩</span>
-        <span class="nav-label">Flows</span>
-      </button>
+
       <button id="navInsights" class="nav-item" data-tab="insights">
         <span class="nav-icon">📊</span>
         <span class="nav-label">Insights</span>

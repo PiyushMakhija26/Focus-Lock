@@ -280,136 +280,6 @@ export async function purgeOldLogs(retentionDays) {
   return deletedCount;
 }
 
-// Helper: generate unique subsequences of length 2 and 3
-function getSubsequences(arr) {
-  const subs = [];
-  const n = arr.length;
-  // Length 2
-  for (let i = 0; i < n; i++) {
-    for (let j = i + 1; j < n; j++) {
-      subs.push([arr[i], arr[j]]);
-    }
-  }
-  // Length 3
-  for (let i = 0; i < n; i++) {
-    for (let j = i + 1; j < n; j++) {
-      for (let k = j + 1; k < n; k++) {
-        subs.push([arr[i], arr[j], arr[k]]);
-      }
-    }
-  }
-  return subs;
-}
-
-// Helper: check if sub array is subsequence of main array in relative order
-function isSubsequence(sub, main) {
-  let i = 0;
-  let j = 0;
-  while (i < sub.length && j < main.length) {
-    if (sub[i] === main[j]) {
-      i++;
-    }
-    j++;
-  }
-  return i === sub.length;
-}
-
-// Mine recurring sequences of domains to discover workflows
-export async function discoverWorkflows() {
-  const sessions = await readAllDB('focusSessions');
-  const candidates = {};
-  
-  sessions.forEach(session => {
-    const sequence = session.domains || [];
-    if (sequence.length < 2) return;
-    
-    // Deduplicate consecutive domains
-    const cleanSeq = [];
-    sequence.forEach(dom => {
-      if (cleanSeq.length === 0 || cleanSeq[cleanSeq.length - 1] !== dom) {
-        cleanSeq.push(dom);
-      }
-    });
-
-    if (cleanSeq.length < 2) return;
-    
-    const uniqueSubs = new Set();
-    const subs = getSubsequences(cleanSeq);
-    subs.forEach(sub => {
-      uniqueSubs.add(sub.join(','));
-    });
-    
-    uniqueSubs.forEach(key => {
-      candidates[key] = (candidates[key] || 0) + 1;
-    });
-  });
-  
-  const discovered = [];
-  const saved = await readAllDB('savedWorkflows');
-  const savedSequences = new Set(saved.map(w => w.sequence.join(',')));
-  
-  for (const key in candidates) {
-    const count = candidates[key];
-    if (count >= 3 && !savedSequences.has(key)) {
-      const sequence = key.split(',');
-      
-      let totalDuration = 0;
-      let totalDistractions = 0;
-      let successes = 0;
-      let matchedSessionsCount = 0;
-      const workspacesMap = {};
-      
-      sessions.forEach(s => {
-        // Clean session sequence
-        const seq = s.domains || [];
-        const cleanS = [];
-        seq.forEach(d => {
-          if (cleanS.length === 0 || cleanS[cleanS.length - 1] !== d) {
-            cleanS.push(d);
-          }
-        });
-
-        if (isSubsequence(sequence, cleanS)) {
-          matchedSessionsCount++;
-          totalDuration += s.duration || 0;
-          totalDistractions += s.distractions || 0;
-          if (s.outcome === 'yes') {
-            successes++;
-          }
-          if (s.workspaceId) {
-            workspacesMap[s.workspaceId] = (workspacesMap[s.workspaceId] || 0) + 1;
-          }
-        }
-      });
-      
-      if (matchedSessionsCount > 0) {
-        const successRate = successes / matchedSessionsCount;
-        
-        let primaryWorkspace = '';
-        let maxWSCount = 0;
-        for (const wsId in workspacesMap) {
-          if (workspacesMap[wsId] > maxWSCount) {
-            maxWSCount = workspacesMap[wsId];
-            primaryWorkspace = wsId;
-          }
-        }
-        
-        discovered.push({
-          sequence,
-          occurrenceCount: matchedSessionsCount,
-          averageDuration: totalDuration / matchedSessionsCount,
-          averageDistractions: totalDistractions / matchedSessionsCount,
-          successRate,
-          associatedWorkspaces: primaryWorkspace ? [primaryWorkspace] : []
-        });
-      }
-    }
-  }
-  
-  return discovered.sort((a, b) => b.occurrenceCount - a.occurrenceCount);
-}
-
-// Generate recommendations locally using statistical analysis
 export async function generateWorkspaceRecommendations(workspaces) {
   const sessions = await readAllDB('focusSessions');
   const activity = await readAllDB('activityLogs');
@@ -523,98 +393,7 @@ export async function generateWorkspaceRecommendations(workspaces) {
     }
   }
 
-  // 3. Workflow Creation (V4)
-  const discWorkflows = await discoverWorkflows();
-  discWorkflows.forEach(dw => {
-    if (dw.occurrenceCount >= 5) {
-      const seqStr = dw.sequence.join('-');
-      const successPct = Math.round(dw.successRate * 100);
-      const avgDurMins = Math.round(dw.averageDuration / 60000);
-      
-      // Categorize workflow name based on domains
-      let sugName = 'General Work Session';
-      const categories = dw.sequence.map(d => getDomainCategory(d));
-      if (categories.includes('Development')) {
-        sugName = 'Software Development';
-      } else if (categories.includes('Writing')) {
-        sugName = 'Document Writing';
-      } else if (categories.includes('Learning')) {
-        sugName = 'Interactive Course Study';
-      }
 
-      addRecommendation({
-        id: `rec-wf-create-${seqStr}`,
-        type: 'workflow_creation',
-        workspaceId: '',
-        workspaceName: '',
-        details: { 
-          sequence: dw.sequence,
-          sugName,
-          successRate: dw.successRate,
-          averageDuration: dw.averageDuration,
-          averageDistractions: dw.averageDistractions
-        },
-        recommendation: `Save ${dw.sequence.join(' → ')} as a Saved Workflow?`,
-        explanation: `Observed in ${dw.occurrenceCount} sessions. Success Rate: ${successPct}%. Average Focus: ${avgDurMins} Mins.`,
-        confidence: dw.successRate >= 0.75 ? 'Very High' : 'High',
-        createdAt: Date.now(),
-        action: 'pending',
-        actionDate: null
-      });
-    }
-  });
-
-  // 4. Workflow Optimization (V4)
-  // Look for two workflows that share a prefix of length 2 but differ in the 3rd element
-  // e.g. [A, B, Distraction] (low success) vs [A, B, Tool] (high success)
-  const savedWfs = await readAllDB('savedWorkflows');
-  
-  for (let i = 0; i < discWorkflows.length; i++) {
-    const w1 = discWorkflows[i];
-    if (w1.sequence.length < 3) continue;
-
-    for (let j = 0; j < discWorkflows.length; j++) {
-      if (i === j) continue;
-      const w2 = discWorkflows[j];
-      if (w2.sequence.length < 3) continue;
-
-      // Check if prefix of length 2 matches
-      if (w1.sequence[0] === w2.sequence[0] && w1.sequence[1] === w2.sequence[1]) {
-        const d1 = w1.sequence[2];
-        const d2 = w2.sequence[2];
-        
-        const cat1 = getDomainCategory(d1);
-        const cat2 = getDomainCategory(d2);
-
-        // If w1 contains distraction/entertainment and has low success, and w2 has high success
-        if ((cat1 === 'Entertainment' || cat1 === 'Uncategorized') && w1.successRate < w2.successRate) {
-          const improvementMins = Math.round((w2.averageDuration - w1.averageDuration) / 60000);
-          
-          if (improvementMins > 10) {
-            addRecommendation({
-              id: `rec-wf-opt-${w1.sequence.join('-')}`,
-              type: 'workflow_optimization',
-              workspaceId: '',
-              workspaceName: '',
-              details: {
-                w1Sequence: w1.sequence,
-                w2Sequence: w2.sequence,
-                w1Success: w1.successRate,
-                w2Success: w2.successRate,
-                improvement: improvementMins
-              },
-              recommendation: `Optimize Workflow: Replace ${d1} with ${d2}?`,
-              explanation: `Sessions containing ${d1} show lower success rates (${Math.round(w1.successRate * 100)}%). Switching to ${d2} yields a success rate of ${Math.round(w2.successRate * 100)}% (+${improvementMins} mins focus).`,
-              confidence: 'High',
-              createdAt: Date.now(),
-              action: 'pending',
-              actionDate: null
-            });
-          }
-        }
-      }
-    }
-  }
 
   // Save pending recommendations
   for (const rec of recommendations) {
@@ -739,19 +518,10 @@ export async function getAttentionScorecard() {
   };
 }
 
-// Generate narrative report summary (Focus Lock v4)
 export function generateNarrativeSummary(currData, prevData) {
   if (!currData) return "Not enough data to compile a report.";
 
   const textParts = [];
-  
-  // Main workflow story
-  if (currData.topWorkflowSequence && currData.topWorkflowSequence.length > 0) {
-    const successPct = Math.round((currData.topWorkflowSuccessCount / currData.topWorkflowSessionsCount) * 100);
-    textParts.push(`This week your most successful workflow was ${currData.topWorkflowSequence.join(' → ')}, yielding an outcome success rate of ${successPct}%.`);
-  } else {
-    textParts.push(`No prominent workflow was identified this week.`);
-  }
 
   // Session completion metrics
   if (currData.totalSessionsCount > 0) {
@@ -786,16 +556,6 @@ export function generateNarrativeSummary(currData, prevData) {
         textParts.push(`Context switching increased by ${pct}%.`);
       }
     }
-  }
-
-  // Emerging workflow
-  if (currData.emergingWorkflowSequence && currData.emergingWorkflowSequence.length > 0) {
-    textParts.push(`A new development workflow emerged involving ${currData.emergingWorkflowSequence.join(' → ')}, appearing in ${currData.emergingWorkflowSessionsCount} sessions with above-average outcomes.`);
-  }
-
-  // Recommendations
-  if (currData.recommendationsCount > 0) {
-    textParts.push(`${currData.recommendationsCount} new workflow recommendations were generated.`);
   }
 
   return textParts.join(' ');
@@ -850,35 +610,7 @@ export async function getWeeklyAnalytics(mondayTimestamp) {
       activeTime: categoryDurations[cat]
     })).sort((a,b) => b.activeTime - a.activeTime);
 
-    // Context Switches (total activity logs represents switches)
     const totalSwitchesCount = wActivity.length;
-
-    // Discover top workflow in current sessions
-    const workflowCounts = {};
-    const workflowSuccesses = {};
-    wSessions.forEach(s => {
-      const sequence = s.domains || [];
-      if (sequence.length >= 2) {
-        const sorted = [...sequence].sort();
-        const key = sorted.join(',');
-        workflowCounts[key] = (workflowCounts[key] || 0) + 1;
-        if (s.outcome === 'yes') {
-          workflowSuccesses[key] = (workflowSuccesses[key] || 0) + 1;
-        }
-      }
-    });
-
-    let topWorkflowKey = '';
-    let topWorkflowSessionsCount = 0;
-    for (const key in workflowCounts) {
-      if (workflowCounts[key] > topWorkflowSessionsCount) {
-        topWorkflowSessionsCount = workflowCounts[key];
-        topWorkflowKey = key;
-      }
-    }
-
-    const topWorkflowSequence = topWorkflowKey ? topWorkflowKey.split(',') : [];
-    const topWorkflowSuccessCount = topWorkflowKey ? (workflowSuccesses[topWorkflowKey] || 0) : 0;
 
     return {
       totalFocusTime,
@@ -888,10 +620,7 @@ export async function getWeeklyAnalytics(mondayTimestamp) {
       distractionsCount,
       topDomainsList,
       categoriesBreakdown,
-      totalSwitchesCount,
-      topWorkflowSequence,
-      topWorkflowSessionsCount,
-      topWorkflowSuccessCount
+      totalSwitchesCount
     };
   };
 
@@ -913,21 +642,11 @@ export async function getWeeklyAnalytics(mondayTimestamp) {
     return found ? found.name : 'Custom Lock';
   };
 
-  // Emerging workflow: mock representation for new emerged tools in last 10 sessions
-  let emergingSeq = [];
-  let emergingCount = 0;
-  if (currentStats.totalSessionsCount >= 3) {
-    emergingSeq = ['cursor.sh', 'github.com', 'vercel.app'];
-    emergingCount = Math.round(currentStats.totalSessionsCount * 0.4);
-  }
-
   const finalStats = {
     ...currentStats,
     topWorkspaceName: currentStats.topWorkspaceId ? getWorkspaceName(currentStats.topWorkspaceId) : null,
     recommendationsCount: pendingRecs.length,
-    weekString: `Week of ${weekStart.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`,
-    emergingWorkflowSequence: emergingSeq,
-    emergingWorkflowSessionsCount: emergingCount
+    weekString: `Week of ${weekStart.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`
   };
 
   const narrative = generateNarrativeSummary(finalStats, prevStats);
@@ -1381,7 +1100,6 @@ export async function exportBackupZip() {
   const focusSessions = await readAllDB('focusSessions');
   const activityLogs = await readAllDB('activityLogs');
   const recommendationHistory = await readAllDB('recommendationHistory');
-  const savedWorkflows = await readAllDB('savedWorkflows');
   const intentionLogs = await readAllDB('intentionLogs');
 
   const backupData = {
@@ -1396,7 +1114,6 @@ export async function exportBackupZip() {
     'focusSessions.json': JSON.stringify(focusSessions, null, 2),
     'activityLogs.json': JSON.stringify(activityLogs, null, 2),
     'recommendationHistory.json': JSON.stringify(recommendationHistory, null, 2),
-    'savedWorkflows.json': JSON.stringify(savedWorkflows, null, 2),
     'intentionLogs.json': JSON.stringify(intentionLogs, null, 2)
   };
 
@@ -1419,7 +1136,7 @@ export async function importBackupZip(arrayBuffer) {
   const focusSessions = JSON.parse(files['focusSessions.json']);
   const activityLogs = JSON.parse(files['activityLogs.json']);
   const recommendationHistory = JSON.parse(files['recommendationHistory.json']);
-  const savedWorkflows = files['savedWorkflows.json'] ? JSON.parse(files['savedWorkflows.json']) : [];
+
 
   await chrome.storage.local.set({
     darkMode: settings.darkMode,
@@ -1461,14 +1178,7 @@ export async function importBackupZip(arrayBuffer) {
     }
   }
 
-  // Restore savedWorkflows
-  const existingWfs = await readAllDB('savedWorkflows');
-  const existingWfIds = new Set(existingWfs.map(w => w.workflowId));
-  for (const w of savedWorkflows) {
-    if (!existingWfIds.has(w.workflowId)) {
-      await writeDB('savedWorkflows', w);
-    }
-  }
+
 
   // Restore intentionLogs
   const intentionLogs = files['intentionLogs.json'] ? JSON.parse(files['intentionLogs.json']) : [];
@@ -1515,28 +1225,6 @@ export async function rebuildDerivedCaches() {
     data: weeklyAnalytics
   };
 
-  // 4. Saved Workflows cache
-  const savedWfs = await readAllDB('savedWorkflows');
-  // Re-calculate success rates dynamically for library presentation
-  const sessions = await readAllDB('focusSessions');
-  const freshWfs = savedWfs.map(wf => {
-    let matches = 0;
-    let successes = 0;
-    sessions.forEach(s => {
-      if (isSubsequence(wf.sequence, s.domains || [])) {
-        matches++;
-        if (s.outcome === 'yes') successes++;
-      }
-    });
-    wf.successRate = matches > 0 ? successes / matches : 0.0;
-    return wf;
-  });
-
-  const workflowCache = {
-    generatedAt: Date.now(),
-    data: freshWfs
-  };
-
   // 5. Attention Scorecards cache
   const scorecards = await getAttentionScorecard();
   const attentionScorecard = {
@@ -1548,7 +1236,6 @@ export async function rebuildDerivedCaches() {
     insightCache,
     recommendationCache,
     weeklyReportCache,
-    workflowCache,
     attentionScorecard
   });
 }
@@ -1636,29 +1323,7 @@ export async function updateFocusState(isFocused) {
   await chrome.storage.local.set({ activityTrackingState: tracking });
 }
 
-// Get saved workflow by ID
-export async function getSavedWorkflow(workflowId) {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction(['savedWorkflows'], 'readonly');
-    const store = transaction.objectStore('savedWorkflows');
-    const request = store.get(workflowId);
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = (e) => reject(e.target.error);
-  });
-}
 
-// Save or update a workflow
-export async function saveWorkflow(workflow) {
-  await writeDB('savedWorkflows', workflow);
-  await rebuildDerivedCaches();
-}
-
-// Delete a saved workflow
-export async function deleteSavedWorkflow(workflowId) {
-  await deleteDB('savedWorkflows', workflowId);
-  await rebuildDerivedCaches();
-}
 
 // Update the outcome, rating, and reflection of a focus session
 export async function updateSessionReflection(sessionId, outcome, rating, reflection) {

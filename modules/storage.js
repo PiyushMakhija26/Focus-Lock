@@ -60,33 +60,18 @@ const DEFAULT_STATE = {
   dismissedRecommendations: [],
   focusSessionDistractions: 0,
   focusSessionDomainSequence: [],
-  activeWorkflowId: '',
   dataRetentionPeriod: 365,
   insightCache: null,
   recommendationCache: null,
   weeklyReportCache: null,
-  workflowCache: null,
   attentionScorecard: null,
   dbSchemaVersion: 2,
   
-  // YouTube Focus Filters V4.5.1 State
-  youtubePreset: 'custom', // 'study' | 'learning' | 'minimal' | 'search_only' | 'custom' | 'off'
+  // YouTube Focus Filters State
   hideHomeFeed: false,
   hideShorts: false,
   hideRecommendations: false,
-  hideEndScreens: false,
-  hideComments: false,
-  hideTrending: false,
-  hideNotifications: false,
-  hideCounts: false,
-  youtubeHomepageBehavior: 'placeholder', // 'placeholder' | 'subscriptions' | 'search'
-  youtubeTrustedChannels: [],
-  youtubePreferTrustedChannels: false,
-  youtubeWorkspacePresets: {
-    'ws-learning': 'learning',
-    'ws-coding': 'study'
-  },
-  preSessionYoutubeState: null
+  hideComments: false
 };
 
 // Get single or multiple keys from chrome storage

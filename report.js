@@ -496,7 +496,7 @@ function renderReportSuggestions(recommendations) {
   const pendingRecs = recommendations ? recommendations.filter(r => r.action === 'pending') : [];
 
   if (pendingRecs.length === 0) {
-    listEl.innerHTML = '<div style="color: var(--text-muted); padding: 10px;">No workflow recommendations. Focus Lock is observing your workflow.</div>';
+    listEl.innerHTML = '<div style="color: var(--text-muted); padding: 10px;">No focus recommendations. Focus Lock is observing your activity.</div>';
     return;
   }
 

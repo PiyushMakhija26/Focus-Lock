@@ -1,8 +1,7 @@
 // Focus Lock - Timers and Badge Module
 import { getFocusState, setStorage, clearFocusState } from './storage.js';
 import { recordFocusSession } from './analytics.js';
-import { logFocusSessionRecord, rebuildDerivedCaches, updateActiveDomain, getSavedWorkflow } from './intelligence.js';
-import { updateActiveYoutubeFiltersForSession, restorePreSessionYoutubeState } from './youtubeFilters.js';
+import { logFocusSessionRecord, rebuildDerivedCaches, updateActiveDomain } from './intelligence.js';
 
 // Update Chrome badge state in real-time
 export async function updateBadge() {
@@ -43,27 +42,17 @@ export async function startFocusSession(tab, lockMode, durationMinutes, intent, 
 
   if (lockMode === 'workspace') {
     // For workspace mode, allowedDestination is the workspace name, and we get the workspace's allowed url later
-    // Let's resolve the workspace info from workspaces list or saved workflows
+    // Let's resolve the workspace info from workspaces list
     const storage = await chrome.storage.local.get(['workspaces']);
     const workspaces = storage.workspaces || [];
     let activeWs = workspaces.find(w => w.id === workspaceId);
-    
-    if (!activeWs && workspaceId) {
-      const wf = await getSavedWorkflow(workspaceId);
-      if (wf) {
-        activeWs = {
-          name: wf.name,
-          domains: wf.sequence
-        };
-      }
-    }
     
     if (activeWs) {
       allowedDestination = activeWs.name;
       // Use the first domain as the redirect url fallback
       allowedUrl = activeWs.domains[0] ? `https://${activeWs.domains[0]}` : 'https://google.com';
     } else {
-      throw new Error('Workspace or Saved Workflow not found');
+      throw new Error('Workspace not found');
     }
   } else if (tab) {
     allowedUrl = tab.url;
@@ -109,8 +98,7 @@ export async function startFocusSession(tab, lockMode, durationMinutes, intent, 
     tempBypassesUsed: 0
   });
 
-  // Apply YouTube filter overrides based on active workspace
-  await updateActiveYoutubeFiltersForSession(workspaceId);
+
 
   // Update active tracking with focusSession details
   await updateActiveDomain(tab ? tab.url : allowedUrl, true);
@@ -229,7 +217,6 @@ export async function endFocusSession(isTimerExpiration = false, prematureReflec
   };
 
   // 3. Clear timers & alarms
-  await restorePreSessionYoutubeState();
   await clearFocusState();
   await chrome.alarms.clearAll();
   await setStorage({ 

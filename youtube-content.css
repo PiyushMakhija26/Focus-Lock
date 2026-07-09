@@ -85,44 +85,8 @@ html.hide-recommendations #related {
   display: none !important;
 }
 
-/* Whitelisted recommendations */
-html.filter-individual-recs #related ytd-compact-video-renderer {
-  display: none !important;
-}
-
-html.filter-individual-recs #related ytd-compact-video-renderer.show-trusted-rec {
-  display: flex !important;
-}
-
-/* 4. Hide End Screens */
-html.hide-end-screens .ytp-ce-element,
-html.hide-end-screens .videowall-endscreen,
-html.hide-end-screens .ytp-show-share-panel {
-  display: none !important;
-}
-
-/* 5. Hide Comments */
+/* 4. Hide Comments */
 html.hide-comments ytd-comments,
 html.hide-comments #comments {
-  display: none !important;
-}
-
-/* 6. Hide Trending / Explore */
-html.hide-trending ytd-guide-entry-renderer a[href="/feed/trending"],
-html.hide-trending ytd-mini-guide-entry-renderer a[href="/feed/trending"] {
-  display: none !important;
-}
-
-/* 7. Hide Notifications */
-html.hide-notifications ytd-notification-topbar-button-renderer,
-html.hide-notifications #notification-count {
-  display: none !important;
-}
-
-/* 8. Hide Engagement Statistics (Subscriber/View counts) */
-html.hide-counts #owner-sub-count,
-html.hide-counts #count.ytd-video-primary-info-renderer,
-html.hide-counts ytd-video-view-count-renderer,
-html.hide-counts #metadata-line span:first-child {
   display: none !important;
 }
