@@ -40,6 +40,12 @@ No accounts. No telemetry. No servers. No cloud infrastructure. All data remains
 * **Strict Domain Validation**: Uses standard URL hostname parsing to block local/internal hostnames (`localhost`, `chrome://`, `about:blank`, devtools, etc.) and non-TLD entries from polluting logs.
 * **ZIP Backup & Portability**: Export settings, workspaces, IndexedDB focus sessions, and activity logs into an uncompressed `.zip` file using raw binary byte building, and import them seamlessly.
 
+### 5. Premium Visual Identity & Consistent Design System
+* **Outline SVG Iconography**: Employs a standardized, modern Lucide outline SVG icon system with consistent stroke weight, optical weight, and sizing (18–20px), replacing raw emojis and text indicators.
+* **Unified Visual Components**: Inputs, selects, textareas, buttons, and cards follow standard border-radii (`--border-radius-card: 12px`, `--border-radius-input: 8px`), consistent backdrop blurs (`blur(16px)`), shadows, and unified focus outlines.
+* **Accessibility & Theme Syncing**: Strictly complies with WCAG contrast requirements. Manual light/dark mode preference overrides sync instantly across all views (Popup, Intention Check, and full-screen Insights).
+* **Calm Motion Mechanics**: Settle transitions and interactive indicators within 200ms ease-out, avoiding flashy scaling effects or layout shifts.
+
 ---
 
 ## Directory Structure
