@@ -524,7 +524,9 @@ async function renderQuickSpacesList() {
     const btn = document.createElement('button');
     btn.className = 'launch-card-btn';
     btn.innerHTML = `
-      <span class="card-icon">💼</span>
+      <span class="card-icon">
+        <svg class="card-icon-svg" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/></svg>
+      </span>
       <div class="card-info">
         <span class="card-title">Launch ${ws.name}</span>
         <span class="card-subtitle">${ws.domains.length} allowed domains</span>
@@ -986,7 +988,10 @@ function initInsightsAndBackupListeners() {
         } else {
           alert(res ? res.error : 'Failed to generate demo data');
           btnGenMockData.disabled = false;
-          btnGenMockData.textContent = '🌿 Generate Sample Focus Data';
+          btnGenMockData.innerHTML = `
+            <svg class="btn-icon-svg" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="3" rx="2" ry="2"/><rect width="20" height="8" x="2" y="13" rx="2" ry="2"/><line x1="6" y1="7" x2="6.01" y2="7"/><line x1="6" y1="17" x2="6.01" y2="17"/></svg>
+            <span>Generate Sample Focus Data</span>
+          `;
         }
       });
     });
@@ -1185,7 +1190,10 @@ function updateLaunchRecommendations(level) {
     btn.classList.add('recommended');
     const badge = document.createElement('span');
     badge.className = 'recommendation-badge';
-    badge.textContent = '✨ Recommended';
+    badge.innerHTML = `
+      <svg class="badge-icon-svg" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/></svg>
+      <span>Recommended</span>
+    `;
     btn.appendChild(badge);
   };
 

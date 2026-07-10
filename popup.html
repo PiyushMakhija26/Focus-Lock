@@ -14,7 +14,10 @@
     <!-- Header -->
     <header class="app-header">
       <div class="logo-area">
-        <span class="logo-icon">🌿</span>
+        <svg class="logo-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 22c 1.25-3.25 3.25-6 6-8"/>
+          <path d="M16.8 20c2.4-1.2 4.2-3.6 4.2-7C21 7 17 3 12 3c-3.4 0-5.8 1.8-7 4.2C3.8 9 3 11.6 3 14.8c0 3.4 1.8 5.8 4.2 7c2.4 1.2 5.4.8 7.8-.8Z"/>
+        </svg>
         <span class="logo-text">Focus Lock</span>
       </div>
       <span id="activeModeIndicator" class="active-badge hidden">🔒 ACTIVE</span>
@@ -23,7 +26,9 @@
     <!-- Recovery Banner (only shown if a recovery session is available) -->
     <div id="recoveryBanner" class="recovery-banner hidden">
       <div class="banner-content">
-        <span class="banner-icon">💡</span>
+        <span class="banner-icon">
+          <svg class="banner-icon-svg" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A5 5 0 0 0 8 8c0 1 .3 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+        </span>
         <div class="banner-text">
           <span class="banner-title">Unfinished session found</span>
           <span id="recoveryIntentText" class="banner-desc">"Solving Arrays"</span>
@@ -157,7 +162,9 @@
             <div class="launch-modes-list">
               <!-- Site Lock Button -->
               <button id="btnLaunchSite" class="launch-card-btn" data-mode="site">
-                <span class="card-icon">🌐</span>
+                <span class="card-icon">
+                  <svg class="card-icon-svg" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                </span>
                 <div class="card-info">
                   <span class="card-title">Lock Current Site</span>
                   <span id="launchSiteDomain" class="card-subtitle">domain.com</span>
@@ -166,7 +173,9 @@
 
               <!-- Tab Lock Button -->
               <button id="btnLaunchTab" class="launch-card-btn" data-mode="tab">
-                <span class="card-icon">📍</span>
+                <span class="card-icon">
+                  <svg class="card-icon-svg" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-.44-1.24l-2.78-3.5A2 2 0 0 1 15 9.26V4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v5.26a2 2 0 0 1-.78 1.54l-2.78 3.5a2 2 0 0 0-.44 1.24Z"/></svg>
+                </span>
                 <div class="card-info">
                   <span class="card-title">Lock This Tab Only</span>
                   <span id="launchTabUrl" class="card-subtitle">Exact url</span>
@@ -174,7 +183,10 @@
               </button>
               
               <!-- System Warning for illegal pages -->
-              <p id="unsupportedWarning" class="warning-text hidden">⚠️ Cannot lock to system pages (e.g. chrome://)</p>
+              <p id="unsupportedWarning" class="warning-text hidden">
+                <svg class="warning-icon-svg" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span>Cannot lock to system pages (e.g. chrome://)</span>
+              </p>
 
               <!-- Divider -->
               <div class="section-divider">Spaces Whitelist</div>
@@ -226,7 +238,9 @@
           <!-- System Pause Overlay (Idle/Locked Resume Prompt) -->
           <div id="systemPausePanel" class="system-pause-panel hidden">
             <div class="pause-prompt-card">
-              <span class="pause-prompt-icon">⏸</span>
+              <span class="pause-prompt-icon">
+                <svg class="pause-icon-svg" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/></svg>
+              </span>
               <h3 id="systemPauseTitle" class="pause-prompt-title">Session Suspended</h3>
               <p id="pausePromptText" class="pause-prompt-text">You were away for 0 minutes.</p>
               
@@ -265,11 +279,11 @@
             <div class="input-group text-left">
               <label class="group-label">Productivity Rating</label>
               <div class="rating-stars">
-                <span class="star-btn" data-rating="1">★</span>
-                <span class="star-btn" data-rating="2">★</span>
-                <span class="star-btn" data-rating="3">★</span>
-                <span class="star-btn" data-rating="4">★</span>
-                <span class="star-btn" data-rating="5">★</span>
+                <span class="star-btn" data-rating="1"><svg class="star-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
+                <span class="star-btn" data-rating="2"><svg class="star-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
+                <span class="star-btn" data-rating="3"><svg class="star-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
+                <span class="star-btn" data-rating="4"><svg class="star-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
+                <span class="star-btn" data-rating="5"><svg class="star-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
               </div>
             </div>
 
@@ -303,7 +317,9 @@
       <section id="tabView-spaces" class="tab-view hidden">
         <div class="workspaces-header">
           <h2 class="view-title">Spaces</h2>
-          <button id="btnNewWorkspace" class="btn-icon-plus" title="Create Space">+</button>
+          <button id="btnNewWorkspace" class="btn-icon-plus" title="Create Space">
+            <svg class="btn-plus-svg" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
         </div>
 
         <!-- Create/Edit Workspace Form Panel -->
@@ -448,7 +464,10 @@
         <div class="settings-group">
           <label class="group-label">Developer Tools</label>
           <p class="settings-desc">Populate demo data to inspect insights and evolution reports.</p>
-          <button id="btnGenMockData" class="btn-primary-sage" style="width: 100%;">🌿 Generate Sample Focus Data</button>
+          <button id="btnGenMockData" class="btn-primary-sage" style="width: 100%;">
+            <svg class="btn-icon-svg" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="3" rx="2" ry="2"/><rect width="20" height="8" x="2" y="13" rx="2" ry="2"/><line x1="6" y1="7" x2="6.01" y2="7"/><line x1="6" y1="17" x2="6.01" y2="17"/></svg>
+            <span>Generate Sample Focus Data</span>
+          </button>
         </div>
       </section>
     </main>
@@ -456,24 +475,34 @@
     <!-- Footer Navigation -->
     <nav class="app-nav">
       <button id="navFocus" class="nav-item active" data-tab="focus">
-        <span class="nav-icon">🎯</span>
+        <span class="nav-icon">
+          <svg class="nav-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        </span>
         <span class="nav-label">Focus</span>
       </button>
       <button id="navSpaces" class="nav-item" data-tab="spaces">
-        <span class="nav-icon">💼</span>
+        <span class="nav-icon">
+          <svg class="nav-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/></svg>
+        </span>
         <span class="nav-label">Spaces</span>
       </button>
 
       <button id="navInsights" class="nav-item" data-tab="insights">
-        <span class="nav-icon">📊</span>
+        <span class="nav-icon">
+          <svg class="nav-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        </span>
         <span class="nav-label">Insights</span>
       </button>
       <button id="navYoutube" class="nav-item" data-tab="youtube">
-        <span class="nav-icon">🎬</span>
+        <span class="nav-icon">
+          <svg class="nav-icon-svg brand-youtube" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.108C19.53 3.487 12 3.487 12 3.487s-7.53 0-9.388.568a3.003 3.003 0 0 0-2.11 2.108C0 8.021 0 12 0 12s0 3.979.502 5.837a3.003 3.003 0 0 0 2.11 2.108c1.858.568 9.388.568 9.388.568s7.53 0 9.388-.568a3.003 3.003 0 0 0 2.11-2.108C24 15.979 24 12 24 12s0-3.979-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        </span>
         <span class="nav-label">YouTube</span>
       </button>
       <button id="navSettings" class="nav-item" data-tab="settings">
-        <span class="nav-icon">⚙️</span>
+        <span class="nav-icon">
+          <svg class="nav-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.5 1z"/></svg>
+        </span>
         <span class="nav-label">Settings</span>
       </button>
     </nav>

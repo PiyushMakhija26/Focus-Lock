@@ -45,7 +45,20 @@ document.addEventListener('DOMContentLoaded', () => {
   let allowedUrl = 'https://google.com';
   let lastActiveAllowedTabId = null;
 
-  chrome.storage.local.get(['focusIntent', 'activeWorkspaceId', 'allowedUrl', 'lastActiveAllowedTabId'], (state) => {
+  chrome.storage.local.get(['focusIntent', 'activeWorkspaceId', 'allowedUrl', 'lastActiveAllowedTabId', 'darkMode'], (state) => {
+    // Theme sync
+    let isDark = state.darkMode;
+    if (isDark === null || isDark === undefined) {
+      isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    if (isDark) {
+      document.body.classList.add('dark');
+      document.body.classList.remove('light');
+    } else {
+      document.body.classList.add('light');
+      document.body.classList.remove('dark');
+    }
+
     if (state.focusIntent) {
       focusIntent = state.focusIntent;
       focusIntentEl.textContent = focusIntent;
