@@ -46,6 +46,35 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     });
   } else if (alarm.name === 'badgeUpdater') {
     await updateBadge();
+  } else if (alarm.name.startsWith('tempAccess_')) {
+    const parts = alarm.name.split('_');
+    const domain = parts[1];
+    
+    // Remove domain from tempWhitelistedUntil
+    const storage = await chrome.storage.local.get(['tempWhitelistedUntil']);
+    const tempUntil = storage.tempWhitelistedUntil || {};
+    delete tempUntil[domain];
+    await chrome.storage.local.set({ tempWhitelistedUntil: tempUntil });
+    
+    // Redirection check for all matching tabs
+    chrome.tabs.query({}, async (tabs) => {
+      for (const tab of tabs) {
+        if (tab.url) {
+          try {
+            const urlObj = new URL(tab.url);
+            let hostname = urlObj.hostname.toLowerCase();
+            if (hostname.startsWith('www.')) {
+              hostname = hostname.slice(4);
+            }
+            if (hostname === domain || hostname.endsWith('.' + domain)) {
+              await enforceRedirect(tab.id, tab.url, 'temp_expired');
+            }
+          } catch (e) {
+            // ignore
+          }
+        }
+      }
+    });
   }
 });
 
@@ -271,6 +300,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.action === 'whitelistDomainTimed') {
     addTimedWhitelistDomain(request.domain, request.durationMinutes).then(async () => {
+      // Create alarm to trigger expiration redirection
+      chrome.alarms.create(`tempAccess_${request.domain}_${Date.now()}`, { delayInMinutes: request.durationMinutes });
+      
       const state = await getFocusState();
       const tempBypassesUsed = (state.tempBypassesUsed || 0) + 1;
       const warningsIgnored = (state.warningsIgnored || 0) + 1;
