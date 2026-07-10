@@ -878,31 +878,29 @@ async function renderSpacesList() {
     
     actionsGroup.appendChild(btnExpand);
     
-    if (!ws.isDefault) {
-      const btnEdit = document.createElement('button');
-      btnEdit.className = 'btn-action-small';
-      btnEdit.textContent = 'Edit';
-      btnEdit.addEventListener('click', () => {
-        activeWorkspaceEditId = ws.id;
-        formPanelTitle.textContent = 'Edit Space';
-        wsNameInput.value = ws.name;
-        wsDomainsInput.value = ws.domains.join('\n');
-        workspaceFormPanel.classList.remove('hidden');
-      });
-      
-      const btnDelete = document.createElement('button');
-      btnDelete.className = 'btn-action-small danger';
-      btnDelete.textContent = 'Delete';
-      btnDelete.addEventListener('click', async () => {
-        if (confirm(`Are you sure you want to delete space "${ws.name}"?`)) {
-          await deleteWorkspace(ws.id);
-          renderSpacesList();
-        }
-      });
-      
-      actionsGroup.appendChild(btnEdit);
-      actionsGroup.appendChild(btnDelete);
-    }
+    const btnEdit = document.createElement('button');
+    btnEdit.className = 'btn-action-small';
+    btnEdit.textContent = 'Edit';
+    btnEdit.addEventListener('click', () => {
+      activeWorkspaceEditId = ws.id;
+      formPanelTitle.textContent = 'Edit Space';
+      wsNameInput.value = ws.name;
+      wsDomainsInput.value = ws.domains.join('\n');
+      workspaceFormPanel.classList.remove('hidden');
+    });
+    
+    const btnDelete = document.createElement('button');
+    btnDelete.className = 'btn-action-small danger';
+    btnDelete.textContent = 'Delete';
+    btnDelete.addEventListener('click', async () => {
+      if (confirm(`Are you sure you want to delete space "${ws.name}"?`)) {
+        await deleteWorkspace(ws.id);
+        renderSpacesList();
+      }
+    });
+    
+    actionsGroup.appendChild(btnEdit);
+    actionsGroup.appendChild(btnDelete);
     
     mainRow.appendChild(titleGroup);
     mainRow.appendChild(actionsGroup);

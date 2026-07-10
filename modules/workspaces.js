@@ -42,7 +42,7 @@ export async function editWorkspace(id, name, domains) {
 // Delete a workspace
 export async function deleteWorkspace(id) {
   const workspaces = await getWorkspaces();
-  const filtered = workspaces.filter(w => w.id !== id || w.isDefault); // do not delete default ones
+  const filtered = workspaces.filter(w => w.id !== id);
   await saveWorkspaces(filtered);
 }
 
