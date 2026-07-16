@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Focus Lock",
   "version": "1.0.0",
-  "description": "A premium, calming attention-management tool that voluntarily locks your browser to a single website, tab, or workspace to protect your focus.",
+  "description": "Privacy-first focus extension with voluntary enforcement, local attention analytics, workspace protection, and YouTube distraction filters.",
   "permissions": [
     "tabs",
     "storage",
