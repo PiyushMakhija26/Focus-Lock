@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Focus Lock - Privacy Policy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Focus Lock Color tokens & design variables */
+    :root {
+      --bg-app: #f6f8f6;
+      --bg-card: #ffffff;
+      --text-primary: #212c24;
+      --text-secondary: #5a6d60;
+      --text-muted: #869b8d;
+      --border-color: #e4ebe5;
+      --color-sage: #577861;
+      --color-sage-light: #eef3ef;
+      --color-sage-hover: #45604d;
+      --shadow-sm: 0 4px 12px rgba(44, 58, 48, 0.04);
+      --shadow-md: 0 12px 32px rgba(44, 58, 48, 0.06);
+      --transition-smooth: 0.18s ease-out;
+      --font-family: 'Outfit', sans-serif;
+    }
+
+    /* Auto-dark theme based on system/browser settings */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-app: #121613;
+        --bg-card: #1b211d;
+        --text-primary: #ecf3ee;
+        --text-secondary: #a3b8aa;
+        --text-muted: #6e8275;
+        --border-color: #27312a;
+        --color-sage-light: #202b23;
+        --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.2);
+        --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.3);
+      }
+    }
+
+    /* Reset and base layouts */
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-app);
+      color: var(--text-primary);
+      font-family: var(--font-family);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color var(--transition-smooth), color var(--transition-smooth);
+    }
+
+    /* Container layout constraints */
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 60px 24px;
+    }
+
+    /* Top branding header style */
+    header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .brand-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      color: var(--color-sage);
+    }
+
+    .brand-name {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+
+    h1 {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 8px 0 16px 0;
+      letter-spacing: -0.03em;
+    }
+
+    .last-updated {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Policy details cards styling */
+    .policy-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: var(--shadow-md);
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-top: 36px;
+      margin-bottom: 16px;
+      letter-spacing: -0.01em;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+    }
+
+    h2:first-of-type {
+      margin-top: 0;
+    }
+
+    p {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      font-weight: 400;
+    }
+
+    strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    ul {
+      margin: 0 0 24px 0;
+      padding-left: 20px;
+    }
+
+    li {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+    }
+
+    li strong {
+      color: var(--text-primary);
+    }
+
+    code {
+      background-color: var(--color-sage-light);
+      color: var(--color-sage);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: monospace;
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background-color: var(--border-color);
+      margin: 40px 0;
+    }
+
+    /* Footnotes details & descriptions */
+    .permission-note {
+      background-color: var(--color-sage-light);
+      border-left: 4px solid var(--color-sage);
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin-top: 24px;
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .permission-note p {
+      margin: 0 0 10px 0;
+    }
+
+    .permission-note p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Interactive footer style */
+    footer {
+      text-align: center;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 16px;
+    }
+
+    .footer-link {
+      color: var(--color-sage);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color var(--transition-smooth);
+    }
+
+    .footer-link:hover {
+      color: var(--color-sage-hover);
+      text-decoration: underline;
+    }
+
+    .copyright {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Keyboard navigation outlines */
+    a:focus-visible,
+    button:focus-visible {
+      outline: 2px solid var(--color-sage);
+      outline-offset: 4px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Header Area -->
+    <header>
+      <a href="https://github.com/PiyushMakhija26/Focus-Lock" class="brand-logo" aria-label="Focus Lock Home">
+        <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 2a7 7 0 1 0 10 10"/>
+        </svg>
+        <span class="brand-name">Focus Lock</span>
+      </a>
+      <h1>Privacy Policy</h1>
+      <span class="last-updated">Last Updated: July 2026</span>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="policy-card">
+      <p>Focus Lock is designed from the ground up with a <strong>privacy-first, local-first philosophy</strong>. We believe your attention patterns and browsing data should remain entirely yours.</p>
+      
+      <p>Below is a plain-English, jargon-free explanation of how Focus Lock handles your data.</p>
+
+      <h2>1. What Data Focus Lock Collects & Stores</h2>
+      <p>Focus Lock stores only the minimum data required to run your focus sessions and generate insights:</p>
+      <ul>
+        <li><strong>Preferences & Settings:</strong> Your active theme (light/dark), data retention period, auto-resume settings, and YouTube Focus Filters.</li>
+        <li><strong>Workspace Configurations:</strong> Customized whitelist domains and configurations you define.</li>
+        <li><strong>Focus Sessions:</strong> Timestamps, custom durations, reflection notes, and outcomes (e.g. "Succeeded", "Bypassed").</li>
+        <li><strong>Attention Analytics:</strong> Domain names visited during focus sessions and transition tallies (e.g., navigating from <code>github.com</code> to <code>chatgpt.com</code>).</li>
+      </ul>
+      <p>All information is stored locally on your device.</p>
+
+      <h2>2. Where Your Data is Stored</h2>
+      <ul>
+        <li><strong>100% Local:</strong> All stored data is saved directly on your local device.</li>
+        <li><strong>Storage Engines:</strong> We use Chrome Storage (<code>chrome.storage.local</code>) for settings and preferences, and browser-secured <code>IndexedDB</code> for focus session logs and transition graphs.</li>
+        <li><strong>No Cloud / No Servers:</strong> We do not run any cloud servers, databases, or analytics engines. Your data never leaves your device.</li>
+      </ul>
+
+      <h2>3. Data Deletion & Portability</h2>
+      <ul>
+        <li><strong>Reset Data:</strong> You can clear all logs, analytics, and settings instantly via the "Reset" button inside the Focus Lock Settings panel.</li>
+        <li><strong>Uninstall:</strong> Uninstalling the extension completely deletes all local storage and IndexedDB data associated with Focus Lock.</li>
+        <li><strong>Data Portability:</strong> You can export a zip file backup of your settings and history at any time. Backup exports are created only when initiated by the user.</li>
+      </ul>
+
+      <h2>4. Why We Request Specific Permissions</h2>
+      <p>Focus Lock requests browser permissions only to provide its core functionality:</p>
+      <ul>
+        <li><code>storage</code>: Needed to save your local configurations, whitelists, and daily statistics.</li>
+        <li><code>tabs</code>: Used to identify the active tab's URL to check if it matches your workspace rules.</li>
+        <li><code>webNavigation</code>: Used to intercept blocked pages before they load, redirecting you to your intentional reflection page.</li>
+        <li><code>alarms</code>: Powers your focus timer and measures whitelisted bypass durations.</li>
+        <li><code>notifications</code>: Displays a system alert when a focus session completes.</li>
+        <li><code>scripting</code>: Injects a calming green focus ring overlay on allowed tabs to remind you of your target task.</li>
+        <li><code>idle</code>: Detects if your computer screen is locked so focus tracking pauses automatically.</li>
+      </ul>
+
+      <div class="permission-note">
+        <p>Host permissions are used solely to provide Focus Lock's core functionality, including workspace enforcement, voluntary website restrictions, and visual focus overlays on websites chosen by the user.</p>
+        <p>These permissions are never used to collect browsing history, monitor activity outside the extension's intended functionality, or transmit browsing data to external services.</p>
+      </div>
+
+      <h2>5. Third-Party Services & Telemetry</h2>
+      <ul>
+        <li><strong>0 Trackers:</strong> Focus Lock contains no analytical trackers, Google Analytics, or external logging tools.</li>
+        <li><strong>0 Network Requests:</strong> Focus Lock makes zero outbound network requests to any server. All calculations (directed graphs, scorecards, narrative summaries) are computed locally.</li>
+      </ul>
+    </main>
+
+    <!-- Footer Area -->
+    <footer>
+      <div class="footer-links">
+        <a href="https://github.com/PiyushMakhija26/Focus-Lock" class="footer-link" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
+        <a href="mailto:piyush.dev.in@gmail.com" class="footer-link">Contact Support</a>
+      </div>
+      <div class="copyright">
+        &copy; 2026 Focus Lock. Built with privacy in mind.
+      </div>
+    </footer>
+  </div>
+
+</body>
+</html>
