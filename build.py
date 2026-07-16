@@ -5,7 +5,7 @@ import zipfile
 def build():
     cwd = os.getcwd()
     dist_dir = os.path.join(cwd, "focus_lock_dist")
-    zip_filename = os.path.join(cwd, "focus-lock-v2.0.0.zip")
+    zip_filename = os.path.join(cwd, "focus-lock-v1.0.0.zip")
 
     # 1. Clean old dist and old zip
     if os.path.exists(dist_dir):

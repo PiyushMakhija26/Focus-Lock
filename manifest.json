@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Focus Lock",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "description": "A premium, calming attention-management tool that voluntarily locks your browser to a single website, tab, or workspace to protect your focus.",
   "permissions": [
     "tabs",
