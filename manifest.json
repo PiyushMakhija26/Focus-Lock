@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Focus Lock",
   "version": "1.0.0",
-  "description": "Privacy-first focus extension with voluntary enforcement, local attention analytics, workspace protection, and YouTube distraction filters.",
+  "description": "Privacy-first focus tool with voluntary enforcement, local analytics, workspace protection, and YouTube filters.",
   "permissions": [
     "tabs",
     "storage",
