@@ -6,6 +6,8 @@ import { addTempWhitelistDomain, addTimedWhitelistDomain, getWorkspaces, saveWor
 import { openDB, updateActiveDomain, updateFocusState, rebuildDerivedCaches, purgeOldLogs, populateMockIntelligenceData, updateSessionReflection, writeIntentionLog, runDataCleanupMigration } from './modules/intelligence.js';
 import { recordDistraction } from './modules/analytics.js';
 
+const SHOW_DEV_TOOLS = false;
+
 // Initialize defaults on install
 chrome.runtime.onInstalled.addListener(async () => {
   await initializeStorage();
@@ -111,16 +113,24 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
 });
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  if (changeInfo.url) {
-    await enforceRedirect(tabId, changeInfo.url, 'updated');
-    if (tab.active) {
-      await updateActiveDomain(changeInfo.url, true);
+  try {
+    if (changeInfo.url) {
+      await enforceRedirect(tabId, changeInfo.url, 'updated');
+      if (tab.active) {
+        await updateActiveDomain(changeInfo.url, true);
+      }
     }
+  } catch (err) {
+    console.warn('onUpdated listener error:', err.message);
   }
 });
 
 chrome.tabs.onCreated.addListener(async (tab) => {
-  await enforceTabCreated(tab);
+  try {
+    await enforceTabCreated(tab);
+  } catch (err) {
+    console.warn('onCreated listener error:', err.message);
+  }
 });
 
 chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
@@ -342,6 +352,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.action === 'generateMockData') {
+    if (!SHOW_DEV_TOOLS) {
+      sendResponse({ success: false, error: 'Unauthorized in production' });
+      return true;
+    }
     populateMockIntelligenceData().then(() => {
       sendResponse({ success: true });
     }).catch(err => {

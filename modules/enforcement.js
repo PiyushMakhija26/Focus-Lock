@@ -240,7 +240,9 @@ export async function enforceRedirect(tabId, url, triggerEvent) {
     
     // Redirect to intention check page
     const intentionUrl = chrome.runtime.getURL(`intention.html?level=${level}&url=${encodeURIComponent(url)}&workspace=${encodeURIComponent(state.allowedDestination)}`);
-    chrome.tabs.update(tabId, { url: intentionUrl });
+    chrome.tabs.update(tabId, { url: intentionUrl }).catch(err => {
+      console.warn('enforceRedirect tabs.update warn:', err.message);
+    });
     return;
   }
 
@@ -250,11 +252,17 @@ export async function enforceRedirect(tabId, url, triggerEvent) {
     await chrome.storage.local.set({ blockedAttempts: count + 1 });
     
     if (tabId === state.originalTabId) {
-      chrome.tabs.update(tabId, { url: state.allowedUrl });
+      chrome.tabs.update(tabId, { url: state.allowedUrl }).catch(err => {
+        console.warn('enforceRedirect tabs.update level5 warn:', err.message);
+      });
     } else {
-      chrome.tabs.update(tabId, { url: 'about:blank' });
+      chrome.tabs.update(tabId, { url: 'about:blank' }).catch(err => {
+        console.warn('enforceRedirect tabs.update level5 blank warn:', err.message);
+      });
       if (state.originalTabId) {
-        chrome.tabs.update(state.originalTabId, { active: true });
+        chrome.tabs.update(state.originalTabId, { active: true }).catch(err => {
+          console.warn('enforceRedirect tabs.update level5 active warn:', err.message);
+        });
       }
     }
     return;

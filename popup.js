@@ -5,6 +5,8 @@ import { getAnalyticsSummary } from './modules/analytics.js';
 import { startFocusSession, endFocusSession, resumeFocusSession, pauseEnforcement } from './modules/timers.js';
 import { exportBackupZip, importBackupZip, openDB } from './modules/intelligence.js';
 
+const SHOW_DEV_TOOLS = false;
+
 // DOM Cache
 const bodyElement = document.body;
 const themeToggle = document.getElementById('themeToggle');
@@ -332,6 +334,9 @@ async function syncActiveHomeState() {
         btnSystemResume.onclick = async () => {
           btnSystemResume.disabled = true;
           chrome.runtime.sendMessage({ action: 'resumeSystemPause' }, (response) => {
+            if (chrome.runtime.lastError) {
+              console.warn('resumeSystemPause message error:', chrome.runtime.lastError.message);
+            }
             btnSystemResume.disabled = false;
             if (response && response.success) {
               syncActiveHomeState();
@@ -928,6 +933,11 @@ function initInsightsAndBackupListeners() {
   const btnImportBackup = document.getElementById('btnImportBackup');
   const backupFileInput = document.getElementById('backupFileInput');
   const btnGenMockData = document.getElementById('btnGenMockData');
+  const devToolsGroup = document.getElementById('devToolsGroup');
+
+  if (devToolsGroup) {
+    devToolsGroup.style.display = SHOW_DEV_TOOLS ? 'block' : 'none';
+  }
 
   if (btnExportBackup) {
     btnExportBackup.addEventListener('click', async () => {
@@ -974,7 +984,11 @@ function initInsightsAndBackupListeners() {
   }
 
   if (btnGenMockData) {
+    if (!SHOW_DEV_TOOLS) {
+      btnGenMockData.style.display = 'none';
+    }
     btnGenMockData.addEventListener('click', () => {
+      if (!SHOW_DEV_TOOLS) return;
       btnGenMockData.disabled = true;
       btnGenMockData.textContent = 'Generating...';
       chrome.runtime.sendMessage({ action: 'generateMockData' }, (res) => {

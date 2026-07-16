@@ -2056,4 +2056,42 @@ select:focus {
   border-radius: var(--border-radius-input) !important;
 }
 
+/* Version Info Styling */
+.settings-version-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 30px;
+  margin-bottom: 10px;
+  text-align: center;
+  font-family: var(--font-family);
+  font-size: 11px;
+  color: var(--text-muted);
+  gap: 4px;
+}
+
+.settings-version-info .version-title {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.settings-version-info .version-number {
+  font-weight: 500;
+}
+
+.settings-version-info .version-author {
+  opacity: 0.8;
+}
+
+/* Global Focus Ring for Keyboard Accessibility */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--color-sage) !important;
+  outline-offset: 2px !important;
+}
+
 

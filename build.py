@@ -56,7 +56,7 @@ def build():
 
     # 3. Strip Developer Tools from popup.html
     DEV_TOOLS_HTML = """        <!-- Sample Mock Data Generator -->
-        <div class="settings-group">
+        <div id="devToolsGroup" class="settings-group">
           <label class="group-label">Developer Tools</label>
           <p class="settings-desc">Populate demo data to inspect insights and evolution reports.</p>
           <button id="btnGenMockData" class="btn-primary-sage" style="width: 100%;">
@@ -68,7 +68,11 @@ def build():
 
     # 4. Strip Developer Tools event listener from popup.js
     DEV_TOOLS_JS = """  if (btnGenMockData) {
+    if (!SHOW_DEV_TOOLS) {
+      btnGenMockData.style.display = 'none';
+    }
     btnGenMockData.addEventListener('click', () => {
+      if (!SHOW_DEV_TOOLS) return;
       btnGenMockData.disabled = true;
       btnGenMockData.textContent = 'Generating...';
       chrome.runtime.sendMessage({ action: 'generateMockData' }, (res) => {
@@ -93,6 +97,10 @@ def build():
 
     # 5. Strip mock data message listener from background.js
     DEV_TOOLS_BG = """  if (request.action === 'generateMockData') {
+    if (!SHOW_DEV_TOOLS) {
+      sendResponse({ success: false, error: 'Unauthorized in production' });
+      return true;
+    }
     populateMockIntelligenceData().then(() => {
       sendResponse({ success: true });
     }).catch(err => {
