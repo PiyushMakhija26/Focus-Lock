@@ -1,6 +1,66 @@
 // Focus Lock - Report Dashboard Logic (ES Module)
 import { openDB, getWeeklyAnalytics, cleanDomain, getDomainCategory, getAttentionGraph } from './modules/intelligence.js';
 
+// Demo dataset used only for screenshots and demonstrations
+const DEMO_DATASET = {
+  weeklyReportCache: {
+    data: {
+      current: {
+        weekString: "Week of " + new Date().toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'}),
+        totalFocusTime: 25.5 * 60 * 60 * 1000, // 25.5 hours
+        totalSessionsCount: 18,
+        averageSessionLength: 85 * 60 * 1000, // 85 mins
+        distractionsCount: 12,
+        topDomainsList: [
+          { domain: "github.com", activeTime: 12.4 * 60 * 60 * 1000 },
+          { domain: "chatgpt.com", activeTime: 6.8 * 60 * 60 * 1000 },
+          { domain: "stackoverflow.com", activeTime: 3.5 * 60 * 60 * 1000 },
+          { domain: "notion.so", activeTime: 1.8 * 60 * 60 * 1000 },
+          { domain: "figma.com", activeTime: 1.0 * 60 * 60 * 1000 }
+        ],
+        categoriesBreakdown: [
+          { category: "Development", activeTime: 15.9 * 60 * 60 * 1000 },
+          { category: "Learning & Docs", activeTime: 6.8 * 60 * 60 * 1000 },
+          { category: "Productivity & Notes", activeTime: 1.8 * 60 * 60 * 1000 },
+          { category: "Design", activeTime: 1.0 * 60 * 60 * 1000 }
+        ]
+      },
+      previous: {
+        totalFocusTime: 20.8 * 60 * 60 * 1000,
+        totalSessionsCount: 15,
+        averageSessionLength: 63 * 60 * 1000,
+        distractionsCount: 34
+      },
+      narrative: "Your average focus session increased by 22 minutes while context switching dropped by 88%.\n\nYou're gradually building longer periods of uninterrupted work."
+    }
+  },
+  attentionScorecard: {
+    data: {
+      focusQuality: { label: "High", reason: "Average focus duration ↑ 35% from last week." },
+      contextSwitching: { label: "Low", reason: "Daily switches ↓ 64% from last week." },
+      deepWork: { label: "Strong", reason: "Deep work represents 44% of focus sessions." },
+      workflowStability: { label: "Stable", reason: "69% of browsing switches came from your top transition." }
+    }
+  },
+  recommendationCache: {
+    data: [
+      {
+        action: "pending",
+        recommendation: "Consolidate learning routines",
+        explanation: "You spent 6.8h on chatgpt.com this week. Group research questions into one dedicated block to avoid fracturing focus."
+      },
+      {
+        action: "pending",
+        recommendation: "Protect StackOverflow workflows",
+        explanation: "Transitions between github.com and stackoverflow.com are high. Consider keeping both open side-by-side to reduce context switching."
+      }
+    ]
+  }
+};
+
+const urlParams = new URLSearchParams(window.location.search);
+const isDemoMode = urlParams.get('demo') === 'true';
+
 document.addEventListener('DOMContentLoaded', async () => {
   await syncReportTheme();
   await populateReportData();
@@ -39,6 +99,18 @@ function formatDuration(ms) {
 
 // Populate Weekly Report Data
 async function populateReportData() {
+  // Display timestamp
+  const now = new Date();
+  const dateStr = now.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+  const timeStr = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('generatedDate').textContent = `Generated: ${dateStr} at ${timeStr}`;
+
+  if (isDemoMode) {
+    document.getElementById('demoModeBadge').style.display = 'inline-block';
+    renderDashboard(DEMO_DATASET.weeklyReportCache.data, DEMO_DATASET.attentionScorecard.data, DEMO_DATASET.recommendationCache.data);
+    return;
+  }
+
   chrome.storage.local.get(['weeklyReportCache', 'attentionScorecard', 'recommendationCache'], async (result) => {
     let reportData = null;
     
@@ -63,37 +135,56 @@ async function populateReportData() {
       return;
     }
 
-    // Render scorecards
     const scorecard = result.attentionScorecard ? result.attentionScorecard.data : null;
-    renderReportScorecards(scorecard);
-
-    // Render suggestions
     const recs = result.recommendationCache ? result.recommendationCache.data : [];
-    renderReportSuggestions(recs);
 
-    const curr = reportData.current;
-    const prev = reportData.previous;
+    renderDashboard(reportData, scorecard, recs);
+  });
+}
 
-    // Render Header Info
-    document.getElementById('reportWeekRange').textContent = curr.weekString || 'This Week';
-    document.getElementById('narrativeSummary').textContent = reportData.narrative || 'No narrative compiled for this week.';
+// Render complete dashboard content
+async function renderDashboard(reportData, scorecard, recs) {
+  const curr = reportData.current;
+  const prev = reportData.previous;
 
-    // Render Metrics
-    document.getElementById('metricFocusTime').textContent = formatDuration(curr.totalFocusTime);
-    document.getElementById('metricSessions').textContent = curr.totalSessionsCount;
-    document.getElementById('metricAvgSession').textContent = `${Math.round(curr.averageSessionLength / 60000)}m`;
-    document.getElementById('metricDistractions').textContent = curr.distractionsCount;
+  // Render scorecards
+  renderReportScorecards(scorecard);
 
-    // Render Trends
-    renderTrendElement('trendFocusTime', curr.totalFocusTime, prev.totalFocusTime, 'ms');
-    renderTrendElement('trendSessions', curr.totalSessionsCount, prev.totalSessionsCount, 'count');
-    renderTrendElement('trendAvgSession', curr.averageSessionLength, prev.averageSessionLength, 'ms');
-    renderTrendElement('trendDistractions', curr.distractionsCount, prev.distractionsCount, 'distractions');
+  // Render suggestions
+  renderReportSuggestions(recs);
 
-    // Render Top Domains List
-    const domainsListEl = document.getElementById('topDomainsList');
-    domainsListEl.innerHTML = '';
-    
+  // Render Header Info
+  document.getElementById('reportWeekRange').textContent = curr.weekString || 'This Week';
+  document.getElementById('narrativeSummary').textContent = reportData.narrative || 'No narrative compiled for this week.';
+
+  // Render highlight chip
+  renderWeeklyHighlight(reportData);
+
+  // Render Metrics
+  document.getElementById('metricFocusTime').textContent = formatDuration(curr.totalFocusTime);
+  document.getElementById('metricSessions').textContent = curr.totalSessionsCount;
+  document.getElementById('metricAvgSession').textContent = `${Math.round(curr.averageSessionLength / 60000)}m`;
+  document.getElementById('metricDistractions').textContent = curr.distractionsCount;
+
+  // Render Trends
+  renderTrendElement('trendFocusTime', curr.totalFocusTime, prev.totalFocusTime, 'ms');
+  renderTrendElement('trendSessions', curr.totalSessionsCount, prev.totalSessionsCount, 'count');
+  renderTrendElement('trendAvgSession', curr.averageSessionLength, prev.averageSessionLength, 'ms');
+  renderTrendElement('trendDistractions', curr.distractionsCount, prev.distractionsCount, 'distractions');
+
+  // Render Top Domains List with Favicons
+  const domainsListEl = document.getElementById('topDomainsList');
+  domainsListEl.innerHTML = '';
+  
+  if (curr.topDomainsList.length === 0) {
+    domainsListEl.innerHTML = `
+      <div class="empty-state-card">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span class="empty-state-title">No focus data yet</span>
+        <span class="empty-state-desc">Start a focus session to begin building your attention history.</span>
+      </div>
+    `;
+  } else {
     const maxDomainTime = curr.topDomainsList.length > 0 ? curr.topDomainsList[0].activeTime : 1;
     curr.topDomainsList.forEach(item => {
       const pct = Math.round((item.activeTime / maxDomainTime) * 100);
@@ -101,20 +192,33 @@ async function populateReportData() {
       domDiv.className = 'progress-item';
       domDiv.innerHTML = `
         <div class="progress-meta">
-          <span class="progress-name">${item.domain}</span>
+          <span class="progress-name" style="display: flex; align-items: center; gap: 8px;">
+            <img class="domain-favicon" src="https://www.google.com/s2/favicons?sz=32&domain=${item.domain}" width="16" height="16" alt="" style="border-radius: 3px;" />
+            ${item.domain}
+          </span>
           <span class="progress-val">${formatDuration(item.activeTime)}</span>
         </div>
         <div class="progress-bar-bg">
-          <div class="progress-bar-fg" style="width: ${pct}%"></div>
+          <div class="progress-bar-fg" style="--progress-pct: ${pct}%"></div>
         </div>
       `;
       domainsListEl.appendChild(domDiv);
     });
+  }
 
-    // Render Categories Breakdown List
-    const categoriesListEl = document.getElementById('categoriesList');
-    categoriesListEl.innerHTML = '';
-    
+  // Render Categories Breakdown List
+  const categoriesListEl = document.getElementById('categoriesList');
+  categoriesListEl.innerHTML = '';
+  
+  if (curr.categoriesBreakdown.length === 0) {
+    categoriesListEl.innerHTML = `
+      <div class="empty-state-card">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <span class="empty-state-title">No categories tracked</span>
+        <span class="empty-state-desc">Active domains will categorize automatically as focus logs build.</span>
+      </div>
+    `;
+  } else {
     const maxCatTime = curr.categoriesBreakdown.length > 0 ? curr.categoriesBreakdown[0].activeTime : 1;
     curr.categoriesBreakdown.forEach(item => {
       const pct = Math.round((item.activeTime / maxCatTime) * 100);
@@ -126,15 +230,19 @@ async function populateReportData() {
           <span class="progress-val">${formatDuration(item.activeTime)}</span>
         </div>
         <div class="progress-bar-bg">
-          <div class="progress-bar-fg category-bar" style="width: ${pct}%"></div>
+          <div class="progress-bar-fg category-bar" style="--progress-pct: ${pct}%"></div>
         </div>
       `;
       categoriesListEl.appendChild(catDiv);
     });
+  }
 
-    // Render Transition Graph Visualizer
-    await renderTransitionGraph();
-  });
+  // Render Transition Graph Visualizer
+  await renderTransitionGraph();
+
+  // Hide skeleton loading and show dashboard content
+  document.getElementById('reportSkeletonState').style.display = 'none';
+  document.getElementById('reportRealContent').style.display = 'block';
 }
 
 // Render trend text and arrow
@@ -164,7 +272,7 @@ function renderTrendElement(elementId, currVal, prevVal, type) {
   if (type === 'ms') {
     const diffMins = Math.round(Math.abs(diff) / 60000);
     if (diffMins > 0) {
-      diffStr = `${diffMins} Mins`;
+      diffStr = `${diffMins}m`;
     }
   }
 
@@ -174,8 +282,52 @@ function renderTrendElement(elementId, currVal, prevVal, type) {
     isGood = diff < 0;
   }
 
-  el.textContent = `${arrow} ${diffStr} vs Last Week`;
+  el.textContent = `${arrow} ${diffStr} from last week.`;
   el.className = `metric-trend ${isGood ? 'trend-up' : 'trend-down'}`;
+}
+
+// Render dynamic highlight weekly insight chip
+function renderWeeklyHighlight(reportData) {
+  const container = document.getElementById('weeklyHighlightContainer');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const curr = reportData.current;
+  const prev = reportData.previous;
+
+  let highlightText = '';
+  
+  // 1. Biggest Improvement: Context Switching drop
+  if (prev && prev.distractionsCount > 0) {
+    const diffSw = curr.distractionsCount - prev.distractionsCount;
+    if (diffSw < 0) {
+      const pct = Math.round((Math.abs(diffSw) / prev.distractionsCount) * 100);
+      if (pct >= 15) {
+        highlightText = `Biggest Improvement: Context Switching ↓ ${pct}%`;
+      }
+    }
+  }
+
+  // 2. Longest focus session duration
+  if (!highlightText && curr.averageSessionLength > 45 * 60 * 1000) {
+    const avgMins = Math.round(curr.averageSessionLength / 60000);
+    highlightText = `Longest Focus Session: ${avgMins} minutes average`;
+  }
+
+  // 3. Most Productive Domain
+  if (!highlightText && curr.topDomainsList && curr.topDomainsList.length > 0) {
+    highlightText = `Most Productive Domain: ${curr.topDomainsList[0].domain}`;
+  }
+
+  if (highlightText) {
+    const chip = document.createElement('div');
+    chip.className = 'weekly-highlight-chip';
+    chip.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/></svg>
+      <span>${highlightText}</span>
+    `;
+    container.appendChild(chip);
+  }
 }
 
 // Render transition directed graph via SVG
@@ -184,26 +336,51 @@ async function renderTransitionGraph() {
   if (!svg) return;
   svg.innerHTML = '';
 
-  let graph;
-  try {
-    graph = await getAttentionGraph();
-  } catch (err) {
-    console.error('Failed to get attention graph:', err);
-    svg.innerHTML = `<text x="350" y="150" fill="var(--text-muted)" text-anchor="middle">Failed to load graph.</text>`;
+  let graph = null;
+  if (isDemoMode) {
+    graph = {
+      nodes: [
+        { id: "github.com", label: "github.com", type: "domain" },
+        { id: "ws-coding", label: "Coding Workspace", type: "workspace" },
+        { id: "chatgpt.com", label: "chatgpt.com", type: "domain" },
+        { id: "stackoverflow.com", label: "stackoverflow.com", type: "domain" },
+        { id: "notion.so", label: "notion.so", type: "domain" }
+      ],
+      edges: [
+        { source: "ws-coding", target: "github.com", weight: 42, type: "directed" },
+        { source: "github.com", target: "chatgpt.com", weight: 28, type: "directed" },
+        { source: "github.com", target: "stackoverflow.com", weight: 15, type: "directed" },
+        { source: "stackoverflow.com", target: "ws-coding", weight: 9, type: "directed" },
+        { source: "chatgpt.com", target: "notion.so", weight: 4, type: "directed" }
+      ]
+    };
+  } else {
+    try {
+      graph = await getAttentionGraph();
+    } catch (err) {
+      console.error('Failed to get attention graph:', err);
+    }
+  }
+
+  if (!graph || graph.nodes.length < 2) {
+    svg.innerHTML = `
+      <foreignObject x="150" y="80" width="400" height="200">
+        <div class="empty-state-card" style="min-height: 200px;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          <span class="empty-state-title">No transition data yet</span>
+          <span class="empty-state-desc">Browsing patterns will appear after multiple focus sessions.</span>
+        </div>
+      </foreignObject>
+    `;
     return;
   }
 
   const { nodes, edges } = graph;
 
-  if (nodes.length < 2) {
-    svg.innerHTML = `<text x="350" y="150" fill="var(--text-muted)" text-anchor="middle">Not enough focus data to render attention graph.</text>`;
-    return;
-  }
-
   // Draw Marker for Arrowheads
   const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
   defs.innerHTML = `
-    <marker id="arrow" viewBox="0 0 10 10" refX="28" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <marker id="arrow" viewBox="0 0 10 10" refX="32" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-muted)" />
     </marker>
   `;
@@ -211,8 +388,8 @@ async function renderTransitionGraph() {
 
   // Define node positions symmetrically in a circle
   const centerX = 350;
-  const centerY = 150;
-  const radius = 100;
+  const centerY = 175;
+  const radius = 110;
 
   const nodePositions = {};
   nodes.forEach((node, index) => {
@@ -220,11 +397,11 @@ async function renderTransitionGraph() {
     nodePositions[node.id] = {
       x: centerX + radius * Math.cos(angle),
       y: centerY + radius * Math.sin(angle),
-      radius: node.type === 'workspace' ? 34 : 26
+      radius: node.type === 'workspace' ? 38 : 30
     };
   });
 
-  // 1. Draw directed arrow paths and co-occurrences
+  // 1. Draw directed arrow paths
   edges.forEach(edge => {
     const p1 = nodePositions[edge.source];
     const p2 = nodePositions[edge.target];
@@ -259,9 +436,10 @@ async function renderTransitionGraph() {
         line.setAttribute('marker-end', 'url(#arrow)');
       }
       
-      const strokeWidth = Math.min(5, 1 + edge.weight / 4);
+      const strokeWidth = Math.min(8, 1.5 + edge.weight / 2.5);
       line.setAttribute('stroke-width', strokeWidth);
-      line.setAttribute('opacity', '0.6');
+      const opacity = edge.weight <= 2 ? '0.25' : '0.65';
+      line.setAttribute('opacity', opacity);
       svg.appendChild(line);
 
       // Label showing weight
@@ -271,7 +449,7 @@ async function renderTransitionGraph() {
       label.setAttribute('x', midX);
       label.setAttribute('y', midY);
       label.setAttribute('fill', 'var(--text-muted)');
-      label.setAttribute('font-size', '9px');
+      label.setAttribute('font-size', '10px');
       label.setAttribute('font-weight', 'bold');
       label.setAttribute('text-anchor', 'middle');
       label.textContent = edge.weight;
@@ -305,7 +483,7 @@ async function renderTransitionGraph() {
     txt.setAttribute('x', pos.x);
     txt.setAttribute('y', pos.y + 4);
     txt.setAttribute('fill', 'var(--text-primary)');
-    txt.setAttribute('font-size', node.type === 'workspace' ? '9px' : '8px');
+    txt.setAttribute('font-size', node.type === 'workspace' ? '11px' : '10px');
     txt.setAttribute('font-weight', '600');
     txt.setAttribute('text-anchor', 'middle');
 
@@ -452,6 +630,7 @@ function renderReportScorecards(scorecard) {
   items.forEach(item => {
     const card = document.createElement('div');
     card.className = 'scorecard-card';
+    card.setAttribute('tabindex', '0');
 
     const header = document.createElement('div');
     header.className = 'scorecard-header';
@@ -472,16 +651,34 @@ function renderReportScorecards(scorecard) {
     reason.className = 'scorecard-reason';
     reason.textContent = item.data.reason;
 
+    const expandBtn = document.createElement('div');
+    expandBtn.className = 'scorecard-expand-btn';
+    expandBtn.setAttribute('tabindex', '0');
+    expandBtn.setAttribute('role', 'button');
+    expandBtn.setAttribute('aria-expanded', 'false');
+    expandBtn.textContent = 'How is this calculated?';
+
     const ruleDiv = document.createElement('div');
     ruleDiv.className = 'scorecard-rule hidden';
     ruleDiv.innerHTML = `<strong>Calculation Rule:</strong><br>${item.rule}`;
 
     card.appendChild(header);
     card.appendChild(reason);
+    card.appendChild(expandBtn);
     card.appendChild(ruleDiv);
 
-    card.addEventListener('click', () => {
-      ruleDiv.classList.toggle('hidden');
+    const toggleRule = (e) => {
+      e.stopPropagation();
+      const isHidden = ruleDiv.classList.toggle('hidden');
+      expandBtn.setAttribute('aria-expanded', !isHidden ? 'true' : 'false');
+    };
+
+    expandBtn.addEventListener('click', toggleRule);
+    expandBtn.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleRule(e);
+      }
     });
 
     scorecardList.appendChild(card);
@@ -496,7 +693,13 @@ function renderReportSuggestions(recommendations) {
   const pendingRecs = recommendations ? recommendations.filter(r => r.action === 'pending') : [];
 
   if (pendingRecs.length === 0) {
-    listEl.innerHTML = '<div style="color: var(--text-muted); padding: 10px;">No focus recommendations. Focus Lock is observing your activity.</div>';
+    listEl.innerHTML = `
+      <div class="empty-state-card" style="grid-column: span 2;">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        <span class="empty-state-title">No recommendations yet</span>
+        <span class="empty-state-desc">Complete additional sessions to unlock workflow insights.</span>
+      </div>
+    `;
     return;
   }
 

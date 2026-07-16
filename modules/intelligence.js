@@ -419,10 +419,10 @@ export async function getAttentionScorecard() {
     
     if (durationPct >= 0.10 && distractionsDecrease >= 0) {
       focusQualityLabel = 'High';
-      focusQualityReason = `Average focus session duration increased by ${Math.round(durationPct * 100)}% and distractions decreased by ${distractionsDecrease}.`;
+      focusQualityReason = `Average focus duration ↑ ${Math.round(durationPct * 100)}% from last week.`;
     } else if (durationPct < -0.10) {
       focusQualityLabel = 'Low';
-      focusQualityReason = `Average focus session duration decreased by ${Math.round(Math.abs(durationPct) * 100)}%.`;
+      focusQualityReason = `Average focus duration ↓ ${Math.round(Math.abs(durationPct) * 100)}% from last week.`;
     }
   }
   
@@ -450,10 +450,10 @@ export async function getAttentionScorecard() {
     
     if (switchPct <= -0.10 || currSwitches < 30) {
       contextSwitchingLabel = 'Low';
-      contextSwitchingReason = `Average daily switches decreased by ${Math.round(Math.abs(switchPct) * 100)}% to ${currSwitches} total.`;
+      contextSwitchingReason = `Daily switches ↓ ${Math.round(Math.abs(switchPct) * 100)}% from last week.`;
     } else if (switchPct >= 0.15) {
       contextSwitchingLabel = 'High';
-      contextSwitchingReason = `Average daily switches increased by ${Math.round(switchPct * 100)}% to ${currSwitches} total.`;
+      contextSwitchingReason = `Daily switches ↑ ${Math.round(switchPct * 100)}% from last week.`;
     }
   }
   
@@ -480,14 +480,13 @@ export async function getAttentionScorecard() {
   const deepWorkPct = currSessions.length > 0 ? deepWorkCount / currSessions.length : 0;
   let deepWorkLabel = 'Emerging';
   let deepWorkReason = 'Focus sessions are beginning to show segments of deep concentration.';
-  
-  if (deepWorkPct >= 0.35) {
-    deepWorkLabel = 'Strong';
-    deepWorkReason = `Deep work sessions represent ${Math.round(deepWorkPct * 100)}% of your focus sessions this week (${deepWorkCount} sessions).`;
-  } else if (deepWorkPct >= 0.15) {
-    deepWorkLabel = 'Moderate';
-    deepWorkReason = `Deep work sessions represent ${Math.round(deepWorkPct * 100)}% of focus sessions (${deepWorkCount} sessions).`;
-  }
+    if (deepWorkPct >= 0.35) {
+      deepWorkLabel = 'Strong';
+      deepWorkReason = `Deep work represents ${Math.round(deepWorkPct * 100)}% of focus sessions.`;
+    } else if (deepWorkPct >= 0.15) {
+      deepWorkLabel = 'Moderate';
+      deepWorkReason = `Deep work represents ${Math.round(deepWorkPct * 100)}% of focus sessions.`;
+    }
   
   // 4. Workflow Stability
   const transitions = await readAllDB('transitions');
@@ -504,10 +503,10 @@ export async function getAttentionScorecard() {
   
   if (topTransPct >= 0.25) {
     stabilityLabel = 'Stable';
-    stabilityReason = `Top transition counts represent ${Math.round(topTransPct * 100)}% of total browsing switches.`;
+    stabilityReason = `${Math.round(topTransPct * 100)}% of browsing switches came from your top transition.`;
   } else if (topTransPct >= 0.10) {
     stabilityLabel = 'Improving';
-    stabilityReason = `Top transition counts are aligning, representing ${Math.round(topTransPct * 100)}% of total switches.`;
+    stabilityReason = `${Math.round(topTransPct * 100)}% of browsing switches came from your top transition.`;
   }
   
   return {
@@ -521,44 +520,34 @@ export async function getAttentionScorecard() {
 export function generateNarrativeSummary(currData, prevData) {
   if (!currData) return "Not enough data to compile a report.";
 
-  const textParts = [];
+  let line1 = "";
+  let line2 = "";
 
-  // Session completion metrics
-  if (currData.totalSessionsCount > 0) {
-    textParts.push(`You completed ${currData.totalSessionsCount} focus sessions.`);
-  }
+  const mins = Math.round(currData.averageSessionLength / 60000);
 
-  // Session length narrative
-  if (currData.averageSessionLength > 0) {
-    const mins = Math.round(currData.averageSessionLength / 60000);
-    if (prevData && prevData.averageSessionLength > 0) {
-      const diffMins = Math.round((currData.averageSessionLength - prevData.averageSessionLength) / 60000);
-      if (diffMins > 0) {
-        textParts.push(`Your average focus session length increased by ${diffMins} minutes.`);
-      } else if (diffMins < 0) {
-        textParts.push(`Your average focus session length decreased by ${Math.abs(diffMins)} minutes.`);
-      } else {
-        textParts.push(`Your average focus session length remained stable at ${mins} minutes.`);
-      }
+  if (prevData && prevData.averageSessionLength > 0) {
+    const diffMins = Math.round((currData.averageSessionLength - prevData.averageSessionLength) / 60000);
+    const diffSw = (currData.totalSwitchesCount || 0) - (prevData.totalSwitchesCount || 0);
+    const switchPct = prevData.totalSwitchesCount > 0 ? Math.round((Math.abs(diffSw) / prevData.totalSwitchesCount) * 100) : 0;
+
+    let durText = diffMins > 0 ? `increased by ${diffMins} minutes` : diffMins < 0 ? `decreased by ${Math.abs(diffMins)} minutes` : `remained stable at ${mins} minutes`;
+    let swText = diffSw < 0 ? `context switching dropped by ${switchPct}%` : diffSw > 0 ? `context switching increased by ${switchPct}%` : `context switching remained stable`;
+
+    line1 = `Your average focus session ${durText} while ${swText}.`;
+
+    if (diffMins > 0 || diffSw < 0) {
+      line2 = "You're gradually building longer periods of uninterrupted work.";
+    } else if (diffMins < 0 || diffSw > 0) {
+      line2 = "Consolidate tasks and limit tabs during focus blocks to reduce switching.";
     } else {
-      textParts.push(`Your average focus session lasted ${mins} minutes.`);
+      line2 = "Consistency is key. Keep your current routine to lock in deep habits.";
     }
+  } else {
+    line1 = `You logged ${currData.totalSessionsCount} focus sessions with an average duration of ${mins} minutes.`;
+    line2 = "Start more sessions next week to unlock comparative trend narrative insights.";
   }
 
-  // Context switches narrative
-  if (currData.totalSwitchesCount !== undefined) {
-    if (prevData && prevData.totalSwitchesCount > 0) {
-      const diffSw = currData.totalSwitchesCount - prevData.totalSwitchesCount;
-      const pct = Math.round((Math.abs(diffSw) / prevData.totalSwitchesCount) * 100);
-      if (diffSw < 0) {
-        textParts.push(`Context switching decreased by ${pct}%.`);
-      } else if (diffSw > 0) {
-        textParts.push(`Context switching increased by ${pct}%.`);
-      }
-    }
-  }
-
-  return textParts.join(' ');
+  return `${line1}\n\n${line2}`;
 }
 
 // Generate all report metrics for a week

@@ -109,6 +109,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initSettingsListeners();
   initInsightsAndBackupListeners();
   initYoutubeListeners();
+  initWhatsNew();
   
   // Initialize Enforcement Level Selector
   await syncEnforcementLevelSelector();
@@ -1211,4 +1212,26 @@ function updateLaunchRecommendations(level) {
     // Level 5 — Strict Tab Lock: recommend Tab Lock
     addBadge(document.getElementById('btnLaunchTab'));
   }
+}
+
+// Check and initialize the What's New version highlights modal
+function initWhatsNew() {
+  const modal = document.getElementById('whatsNewModal');
+  const dismissBtn = document.getElementById('btnDismissWhatsNew');
+  if (!modal || !dismissBtn) return;
+
+  const currentVersion = chrome.runtime.getManifest().version;
+
+  chrome.storage.local.get(['lastSeenVersion'], (result) => {
+    const lastSeenVersion = result.lastSeenVersion;
+    if (lastSeenVersion !== currentVersion) {
+      // Show What's New modal
+      modal.classList.remove('hidden');
+    }
+  });
+
+  dismissBtn.addEventListener('click', () => {
+    modal.classList.add('hidden');
+    chrome.storage.local.set({ lastSeenVersion: currentVersion });
+  });
 }
