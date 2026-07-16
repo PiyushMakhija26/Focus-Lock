@@ -26,7 +26,7 @@ def build():
     root_files = [
         "background.js", "content.css", "content.js", "intention.css", "intention.html",
         "intention.js", "manifest.json", "popup.css", "popup.html", "popup.js",
-        "README.md", "report.html", "report.js", "warning.css", "warning.html",
+        "report.html", "report.js", "warning.css", "warning.html",
         "warning.js", "youtube-content.css"
     ]
 

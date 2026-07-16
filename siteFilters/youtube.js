@@ -11,12 +11,24 @@ const YouTubeFilter = {
       this.observeChanges();
     });
 
-    // Listen for storage changes
+    // Listen for storage changes across popup operations
     chrome.storage.onChanged.addListener((changes) => {
       chrome.storage.local.get(null, (settings) => {
         currentSettings = settings;
         this.applySettings(settings);
       });
+    });
+
+    // Listen for runtime messages indicating active YouTube settings update
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+      if (request.action === 'youtubeSettingsUpdated') {
+        chrome.storage.local.get(null, (settings) => {
+          currentSettings = settings;
+          this.applySettings(settings);
+          sendResponse({ success: true });
+        });
+        return true; // Keep message channel open for async response
+      }
     });
   },
 
@@ -26,18 +38,26 @@ const YouTubeFilter = {
     const path = window.location.pathname;
     const html = document.documentElement;
 
+    // Synchronize global CSS classes dynamically
     html.classList.toggle('hide-home-feed', !!settings.hideHomeFeed);
     html.classList.toggle('hide-shorts', !!settings.hideShorts);
     html.classList.toggle('hide-recommendations', !!settings.hideRecommendations);
     html.classList.toggle('hide-comments', !!settings.hideComments);
 
+    // Apply or restore Shorts visibility
     if (settings.hideShorts) {
       scanAndRemoveShorts();
+    } else {
+      restoreShorts();
     }
 
+    // Apply or restore Home Feed layout placeholder
     if (path === '/' || path === '') {
       if (settings.hideHomeFeed) {
         injectHomepagePlaceholder();
+      } else {
+        const placeholder = document.getElementById('focus-lock-yt-placeholder');
+        if (placeholder) placeholder.remove();
       }
     } else {
       const placeholder = document.getElementById('focus-lock-yt-placeholder');
@@ -46,20 +66,22 @@ const YouTubeFilter = {
   },
 
   observeChanges() {
+    // Reuse MutationObserver if it is already active
     if (filterObserver) {
-      filterObserver.disconnect();
+      return;
     }
 
     // Set up MutationObserver to handle dynamic rendering & SPA updates
     filterObserver = new MutationObserver(() => {
       if (currentSettings) {
-        // Handle homepage placeholder injection if DOM refreshed
         const path = window.location.pathname;
         if ((path === '/' || path === '') && currentSettings.hideHomeFeed) {
           injectHomepagePlaceholder();
+        } else if (path !== '/' && path !== '') {
+          const placeholder = document.getElementById('focus-lock-yt-placeholder');
+          if (placeholder) placeholder.remove();
         }
         
-        // Handle Shorts scan
         if (currentSettings.hideShorts) {
           scanAndRemoveShorts();
         }
@@ -88,10 +110,12 @@ const YouTubeFilter = {
 
     const placeholder = document.getElementById('focus-lock-yt-placeholder');
     if (placeholder) placeholder.remove();
+
+    restoreShorts();
   }
 };
 
-// Injection logic for homepage placeholder
+// Injection logic for homepage placeholder (Idempotent check)
 function injectHomepagePlaceholder() {
   const homeEl = document.querySelector('ytd-browse[page-subtype="home"]') || 
                  document.querySelector('ytd-browse') || 
@@ -99,6 +123,7 @@ function injectHomepagePlaceholder() {
                  
   if (!homeEl) return;
 
+  // Prevent duplicate placeholder card injection
   if (document.getElementById('focus-lock-yt-placeholder')) return;
 
   const placeholder = document.createElement('div');
@@ -113,16 +138,13 @@ function injectHomepagePlaceholder() {
   homeEl.appendChild(placeholder);
 }
 
-
-
 // Automatically start when loaded as content script
 if (typeof window !== 'undefined') {
   window.YouTubeFilter = YouTubeFilter;
-  // Initialize on load
   YouTubeFilter.initialize();
 }
 
-// Complete Shorts scan and remove logic
+// Scan and hide Shorts elements
 function scanAndRemoveShorts() {
   if (!currentSettings || !currentSettings.hideShorts) return;
 
@@ -169,6 +191,58 @@ function scanAndRemoveShorts() {
       const anchor = video.querySelector('a[href*="/shorts"]');
       if (anchor) {
         video.style.setProperty('display', 'none', 'important');
+      }
+    } catch (e) {
+      // ignore
+    }
+  });
+}
+
+// Restore previously hidden Shorts elements immediately
+function restoreShorts() {
+  const selectors = [
+    'a[href*="/shorts"]',
+    '[title*="Shorts" i]',
+    '[aria-label*="Shorts" i]',
+    'ytd-reel-shelf-renderer',
+    'ytd-rich-shelf-renderer[is-shorts]',
+    'ytd-reel-item-renderer'
+  ];
+
+  selectors.forEach(selector => {
+    try {
+      const elements = document.querySelectorAll(selector);
+      elements.forEach(el => {
+        const parent = el.closest('ytd-guide-entry-renderer, ytd-mini-guide-entry-renderer, ytd-reel-shelf-renderer, ytd-rich-shelf-renderer, ytd-video-renderer, ytd-compact-video-renderer, ytd-reel-item-renderer, ytd-rich-grid-video-renderer, yt-chip-cloud-chip-renderer, ytd-rich-item-renderer');
+        if (parent) {
+          parent.style.removeProperty('display');
+        } else {
+          el.style.removeProperty('display');
+        }
+      });
+    } catch (e) {
+      // ignore
+    }
+  });
+
+  const chips = document.querySelectorAll('yt-chip-cloud-chip-renderer');
+  chips.forEach(chip => {
+    try {
+      const text = chip.textContent.trim().toLowerCase();
+      if (text === 'shorts') {
+        chip.style.removeProperty('display');
+      }
+    } catch (e) {
+      // ignore
+    }
+  });
+
+  const videos = document.querySelectorAll('ytd-video-renderer, ytd-compact-video-renderer, ytd-grid-video-renderer, ytd-rich-item-renderer');
+  videos.forEach(video => {
+    try {
+      const anchor = video.querySelector('a[href*="/shorts"]');
+      if (anchor) {
+        video.style.removeProperty('display');
       }
     } catch (e) {
       // ignore

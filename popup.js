@@ -1139,6 +1139,20 @@ function initYoutubeListeners() {
         const update = {};
         update[toggle.key] = e.target.checked;
         await setStorage(update);
+
+        // Send runtime message to open YouTube tabs to synchronize settings live
+        chrome.tabs.query({}, (tabs) => {
+          if (chrome.runtime.lastError) return;
+          if (tabs) {
+            tabs.forEach(tab => {
+              if (tab.url && tab.url.includes('youtube.com')) {
+                chrome.tabs.sendMessage(tab.id, { action: 'youtubeSettingsUpdated' }, (response) => {
+                  const err = chrome.runtime.lastError; // Consume and ignore if tab is not listening yet
+                });
+              }
+            });
+          }
+        });
       });
     }
   });
