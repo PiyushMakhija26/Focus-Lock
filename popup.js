@@ -1224,8 +1224,11 @@ function initWhatsNew() {
 
   chrome.storage.local.get(['lastSeenVersion'], (result) => {
     const lastSeenVersion = result.lastSeenVersion;
-    if (lastSeenVersion !== currentVersion) {
-      // Show What's New modal
+    if (!lastSeenVersion) {
+      // First install / initial version: save version silently without showing popup
+      chrome.storage.local.set({ lastSeenVersion: currentVersion });
+    } else if (lastSeenVersion !== currentVersion) {
+      // It's an update from a previous version: show popup
       modal.classList.remove('hidden');
     }
   });
